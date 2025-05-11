@@ -52,6 +52,18 @@ Here's a simple example of how to use DBerd as a library to extract a schema fro
 
 ```go
 func main() {
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+
+	"github.com/denchenko/dberd/source/cockroach"
+	"github.com/denchenko/dberd/target/d2"
+)
+
+func main() {
 	cockroachSource, err := cockroach.NewSource("postgres://user@host:port/db?sslmode=disable")
 	if err != nil {
 		panic(fmt.Errorf("creating new cockroach source: %w", err))
@@ -80,7 +92,7 @@ func main() {
 		panic(fmt.Errorf("rendering cockroach scheme into d2: %w", err))
 	}
 
-	err = os.WriteFile(filepath.Join("out.svg"), diagram, 0600)
+	err = os.WriteFile("out.svg", diagram, 0600)
 	if err != nil {
 		panic(fmt.Errorf("writing file: %w", err))
 	}
@@ -102,68 +114,68 @@ dberd --source cockroach \
 
 For example, if a Cockroach database has a schema like:
 ```
-	CREATE TABLE users (
-		id INT PRIMARY KEY,
-		name VARCHAR(255) NOT NULL,
-		email VARCHAR(255) NOT NULL,
-		created_at TIMESTAMP DEFAULT current_timestamp()
-	);
+CREATE TABLE users (
+	id INT PRIMARY KEY,
+	name VARCHAR(255) NOT NULL,
+	email VARCHAR(255) NOT NULL,
+	created_at TIMESTAMP DEFAULT current_timestamp()
+);
 
-	CREATE TABLE roles (
-		id INT PRIMARY KEY,
-		name VARCHAR(50) NOT NULL,
-		description STRING,
-		created_at TIMESTAMP DEFAULT current_timestamp()
-	);
+CREATE TABLE roles (
+	id INT PRIMARY KEY,
+	name VARCHAR(50) NOT NULL,
+	description STRING,
+	created_at TIMESTAMP DEFAULT current_timestamp()
+);
 
-	CREATE TABLE user_roles (
-		user_id INT NOT NULL,
-		role_id INT NOT NULL,
-		assigned_at TIMESTAMP DEFAULT current_timestamp(),
-		PRIMARY KEY (user_id, role_id),
-		FOREIGN KEY (user_id) REFERENCES users(id),
-		FOREIGN KEY (role_id) REFERENCES roles(id)
-	);
+CREATE TABLE user_roles (
+	user_id INT NOT NULL,
+	role_id INT NOT NULL,
+	assigned_at TIMESTAMP DEFAULT current_timestamp(),
+	PRIMARY KEY (user_id, role_id),
+	FOREIGN KEY (user_id) REFERENCES users(id),
+	FOREIGN KEY (role_id) REFERENCES roles(id)
+);
 
-	CREATE TABLE posts (
-		id INT PRIMARY KEY,
-		user_id INT NOT NULL,
-		title VARCHAR(255) NOT NULL,
-		content STRING,
-		created_at TIMESTAMP DEFAULT current_timestamp(),
-		FOREIGN KEY (user_id) REFERENCES users(id)
-	);
+CREATE TABLE posts (
+	id INT PRIMARY KEY,
+	user_id INT NOT NULL,
+	title VARCHAR(255) NOT NULL,
+	content STRING,
+	created_at TIMESTAMP DEFAULT current_timestamp(),
+	FOREIGN KEY (user_id) REFERENCES users(id)
+);
 
-	CREATE TABLE categories (
-		id INT PRIMARY KEY,
-		name VARCHAR(100) NOT NULL,
-		description STRING,
-		parent_id INT,
-		created_at TIMESTAMP DEFAULT current_timestamp(),
-		FOREIGN KEY (parent_id) REFERENCES categories(id)
-	);
+CREATE TABLE categories (
+	id INT PRIMARY KEY,
+	name VARCHAR(100) NOT NULL,
+	description STRING,
+	parent_id INT,
+	created_at TIMESTAMP DEFAULT current_timestamp(),
+	FOREIGN KEY (parent_id) REFERENCES categories(id)
+);
 
-	CREATE TABLE post_categories (
-		post_id INT NOT NULL,
-		category_id INT NOT NULL,
-		PRIMARY KEY (post_id, category_id),
-		FOREIGN KEY (post_id) REFERENCES posts(id),
-		FOREIGN KEY (category_id) REFERENCES categories(id)
-	);
+CREATE TABLE post_categories (
+	post_id INT NOT NULL,
+	category_id INT NOT NULL,
+	PRIMARY KEY (post_id, category_id),
+	FOREIGN KEY (post_id) REFERENCES posts(id),
+	FOREIGN KEY (category_id) REFERENCES categories(id)
+);
 
-	CREATE TABLE comments (
-		id INT PRIMARY KEY,
-		post_id INT NOT NULL,
-		user_id INT NOT NULL,
-		content STRING NOT NULL,
-		created_at TIMESTAMP DEFAULT current_timestamp(),
-		FOREIGN KEY (post_id) REFERENCES posts(id),
-		FOREIGN KEY (user_id) REFERENCES users(id)
-	);
+CREATE TABLE comments (
+	id INT PRIMARY KEY,
+	post_id INT NOT NULL,
+	user_id INT NOT NULL,
+	content STRING NOT NULL,
+	created_at TIMESTAMP DEFAULT current_timestamp(),
+	FOREIGN KEY (post_id) REFERENCES posts(id),
+	FOREIGN KEY (user_id) REFERENCES users(id)
+);
 
-	COMMENT ON COLUMN users.email IS 'User email address';
-	COMMENT ON COLUMN roles.description IS 'Role description and permissions';
-	COMMENT ON COLUMN categories.parent_id IS 'Self-referencing foreign key for category hierarchy';
+COMMENT ON COLUMN users.email IS 'User email address';
+COMMENT ON COLUMN roles.description IS 'Role description and permissions';
+COMMENT ON COLUMN categories.parent_id IS 'Self-referencing foreign key for category hierarchy';
 ```
 
 The resulting `scheme.d2` will be:
