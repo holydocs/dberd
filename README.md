@@ -34,6 +34,7 @@ go install github.com/denchenko/dberd/cmd/dberd@latest
 Currently, DBerd supports the following database sources:
 
 - **CockroachDB**: Extract schema from CockroachDB databases using the `cockroach` source type.
+- **ClickHouse**: Extract schema from ClickHouse databases using the `clickhouse` source type.
 
 ## Supported Targets
 

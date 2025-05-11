@@ -8,6 +8,7 @@ import (
 	"os"
 
 	"github.com/denchenko/dberd"
+	"github.com/denchenko/dberd/source/clickhouse"
 	"github.com/denchenko/dberd/source/cockroach"
 	"github.com/denchenko/dberd/target/d2"
 	"github.com/denchenko/dberd/target/json"
@@ -100,6 +101,8 @@ func pickSource(sourceType, sourceDSN string) (dberd.Source, error) {
 	switch sourceType {
 	case "cockroach":
 		return cockroach.NewSource(sourceDSN)
+	case "clickhouse":
+		return clickhouse.NewSource(sourceDSN)
 	}
 	return nil, errors.New("unknown source")
 }
@@ -122,4 +125,5 @@ func printUsage() {
 	flag.PrintDefaults()
 	fmt.Fprintf(os.Stderr, "\nExample:\n")
 	fmt.Fprintf(os.Stderr, "  dberd --source cockroach --target d2 --format-to-file schema.d2 --render-to-file schema.svg --source-dsn \"connection-string\"\n")
+	fmt.Fprintf(os.Stderr, "  dberd --source clickhouse --target d2 --format-to-file schema.d2 --render-to-file schema.svg --source-dsn \"connection-string\"\n")
 }
