@@ -1,5 +1,10 @@
 # DBerd
 
+[![Run Tests](https://github.com/denchenko/dberd/actions/workflows/go.yml/badge.svg?branch=master)](https://github.com/denchenko/dberd/actions/workflows/go.yml)
+[![codecov](https://codecov.io/gh/denchenko/dberd/branch/master/graph/badge.svg)](https://codecov.io/gh/denchenko/dberd)
+[![Go Report Card](https://goreportcard.com/badge/github.com/denchenko/dberd)](https://goreportcard.com/report/github.com/denchenko/dberd)
+[![GoDoc](https://godoc.org/github.com/denchenko/dberd?status.svg)](https://godoc.org/github.com/denchenko/dberd)
+
 DBerd is a Go library and command-line tool that helps you extract database schemas and generate diagrams. It provides a flexible and extensible way to work with different database sources and output formats.
 
 ## Features
@@ -74,6 +79,7 @@ func main() {
 	if err != nil {
 		panic(fmt.Errorf("rendering cockroach scheme into d2: %w", err))
 	}
+
 	err = os.WriteFile(filepath.Join("out.svg"), diagram, 0600)
 	if err != nil {
 		panic(fmt.Errorf("writing file: %w", err))
