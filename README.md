@@ -55,7 +55,7 @@ package main
 
 import (
 	"context"
-	"fmt"
+	"log"
 	"os"
 
 	"github.com/denchenko/dberd/source/cockroach"
@@ -65,7 +65,7 @@ import (
 func main() {
 	cockroachSource, err := cockroach.NewSource("postgres://user@host:port/db?sslmode=disable")
 	if err != nil {
-		panic(fmt.Errorf("creating new cockroach source: %w", err))
+		log.Fatalf("creating new cockroach source: %v", err)
 	}
 	defer cockroachSource.Close()
 
@@ -73,27 +73,27 @@ func main() {
 
 	schema, err := cockroachSource.ExtractSchema(ctx)
 	if err != nil {
-		panic(fmt.Errorf("extracting cockroach schema: %w", err))
+		log.Fatalf("extracting cockroach schema: %v", err)
 	}
 
 	d2Target, err := d2.NewTarget()
 	if err != nil {
-		panic(fmt.Errorf("creating d2 target: %w", err))
+		log.Fatalf("creating d2 target: %v", err)
 	}
 
 	formattedSchema, err := d2Target.FormatSchema(ctx, schema)
 	if err != nil {
-		panic(fmt.Errorf("formatting cockroach schema into d2: %w", err))
+		log.Fatalf("formatting cockroach schema into d2: %v", err)
 	}
 
 	diagram, err := d2Target.RenderSchema(ctx, formattedSchema)
 	if err != nil {
-		panic(fmt.Errorf("rendering cockroach schema into d2: %w", err))
+		log.Fatalf("rendering cockroach schema into d2: %v", err)
 	}
 
 	err = os.WriteFile("out.svg", diagram, 0600)
 	if err != nil {
-		panic(fmt.Errorf("writing file: %w", err))
+		log.Fatalf("writing file: %v", err)
 	}
 }
 ```
