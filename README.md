@@ -1,7 +1,6 @@
 # DBerd
 
 [![Run Tests](https://github.com/denchenko/dberd/actions/workflows/go.yml/badge.svg?branch=main)](https://github.com/denchenko/dberd/actions/workflows/go.yml)
-[![codecov](https://codecov.io/gh/denchenko/dberd/branch/main/graph/badge.svg)](https://codecov.io/gh/denchenko/dberd)
 [![Go Report Card](https://goreportcard.com/badge/github.com/denchenko/dberd)](https://goreportcard.com/report/github.com/denchenko/dberd)
 [![GoDoc](https://godoc.org/github.com/denchenko/dberd?status.svg)](https://godoc.org/github.com/denchenko/dberd)
 
