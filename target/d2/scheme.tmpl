@@ -1,0 +1,16 @@
+direction: right
+
+# Tables
+{{- range .Tables }}
+{{.Name}}: {
+  shape: "sql_table"
+{{- range .Columns }}
+  {{.Name}}: "{{.Definition}}"{{if .IsPrimary}} { constraint: [primary_key] }{{end}}
+{{- end }}
+}
+{{- end }}
+
+# References
+{{- range .References }}
+{{.Source.Table}}.{{.Source.Column}} -> {{.Target.Table}}.{{.Target.Column}}
+{{- end }}

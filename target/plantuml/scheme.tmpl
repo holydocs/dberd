@@ -1,0 +1,24 @@
+@startuml
+!define table(x) class x << (T,#FFAAAA) >>
+!define primary_key(x) <b><u>x</u></b>
+!define foreign_key(x) <i>x</i>
+
+' Tables
+{{- range .Tables }}
+table({{.Name}}) {
+{{- range .Columns }}
+  {{- if .IsPrimary }}
+  primary_key({{.Name}}) : {{.Definition}}
+  {{- else }}
+  {{.Name}} : {{.Definition}}
+  {{- end }}
+{{- end }}
+}
+{{- end }}
+
+' References
+{{- range .References }}
+{{.Source.Table}} }o--|| {{.Target.Table}} : {{.Source.Column}} references {{.Target.Column}}
+{{- end }}
+
+@enduml 

@@ -1,0 +1,264 @@
+{
+  "tables": [
+    {
+      "name": "public.users",
+      "columns": [
+        {
+          "name": "id",
+          "definition": "INT8 NOT NULL",
+          "is_primary": true
+        },
+        {
+          "name": "name",
+          "definition": "VARCHAR(255) NOT NULL",
+          "is_primary": false
+        },
+        {
+          "name": "email",
+          "comment": "User email address",
+          "definition": "VARCHAR(255) NOT NULL",
+          "is_primary": false
+        },
+        {
+          "name": "created_at",
+          "definition": "TIMESTAMP DEFAULT current_timestamp()",
+          "is_primary": false
+        }
+      ]
+    },
+    {
+      "name": "public.roles",
+      "columns": [
+        {
+          "name": "id",
+          "definition": "INT8 NOT NULL",
+          "is_primary": true
+        },
+        {
+          "name": "name",
+          "definition": "VARCHAR(50) NOT NULL",
+          "is_primary": false
+        },
+        {
+          "name": "description",
+          "comment": "Role description and permissions",
+          "definition": "STRING",
+          "is_primary": false
+        },
+        {
+          "name": "created_at",
+          "definition": "TIMESTAMP DEFAULT current_timestamp()",
+          "is_primary": false
+        }
+      ]
+    },
+    {
+      "name": "public.user_roles",
+      "columns": [
+        {
+          "name": "user_id",
+          "definition": "INT8 NOT NULL",
+          "is_primary": true
+        },
+        {
+          "name": "role_id",
+          "definition": "INT8 NOT NULL",
+          "is_primary": true
+        },
+        {
+          "name": "assigned_at",
+          "definition": "TIMESTAMP DEFAULT current_timestamp()",
+          "is_primary": false
+        }
+      ]
+    },
+    {
+      "name": "public.posts",
+      "columns": [
+        {
+          "name": "id",
+          "definition": "INT8 NOT NULL",
+          "is_primary": true
+        },
+        {
+          "name": "user_id",
+          "definition": "INT8 NOT NULL",
+          "is_primary": false
+        },
+        {
+          "name": "title",
+          "definition": "VARCHAR(255) NOT NULL",
+          "is_primary": false
+        },
+        {
+          "name": "content",
+          "definition": "STRING",
+          "is_primary": false
+        },
+        {
+          "name": "created_at",
+          "definition": "TIMESTAMP DEFAULT current_timestamp()",
+          "is_primary": false
+        }
+      ]
+    },
+    {
+      "name": "public.categories",
+      "columns": [
+        {
+          "name": "id",
+          "definition": "INT8 NOT NULL",
+          "is_primary": true
+        },
+        {
+          "name": "name",
+          "definition": "VARCHAR(100) NOT NULL",
+          "is_primary": false
+        },
+        {
+          "name": "description",
+          "definition": "STRING",
+          "is_primary": false
+        },
+        {
+          "name": "parent_id",
+          "comment": "Self-referencing foreign key for category hierarchy",
+          "definition": "INT8",
+          "is_primary": false
+        },
+        {
+          "name": "created_at",
+          "definition": "TIMESTAMP DEFAULT current_timestamp()",
+          "is_primary": false
+        }
+      ]
+    },
+    {
+      "name": "public.post_categories",
+      "columns": [
+        {
+          "name": "post_id",
+          "definition": "INT8 NOT NULL",
+          "is_primary": true
+        },
+        {
+          "name": "category_id",
+          "definition": "INT8 NOT NULL",
+          "is_primary": true
+        }
+      ]
+    },
+    {
+      "name": "public.comments",
+      "columns": [
+        {
+          "name": "id",
+          "definition": "INT8 NOT NULL",
+          "is_primary": true
+        },
+        {
+          "name": "post_id",
+          "definition": "INT8 NOT NULL",
+          "is_primary": false
+        },
+        {
+          "name": "user_id",
+          "definition": "INT8 NOT NULL",
+          "is_primary": false
+        },
+        {
+          "name": "content",
+          "definition": "STRING NOT NULL",
+          "is_primary": false
+        },
+        {
+          "name": "created_at",
+          "definition": "TIMESTAMP DEFAULT current_timestamp()",
+          "is_primary": false
+        }
+      ]
+    }
+  ],
+  "references": [
+    {
+      "source": {
+        "table": "public.categories",
+        "column": "parent_id"
+      },
+      "target": {
+        "table": "public.categories",
+        "column": "id"
+      }
+    },
+    {
+      "source": {
+        "table": "public.comments",
+        "column": "post_id"
+      },
+      "target": {
+        "table": "public.posts",
+        "column": "id"
+      }
+    },
+    {
+      "source": {
+        "table": "public.comments",
+        "column": "user_id"
+      },
+      "target": {
+        "table": "public.users",
+        "column": "id"
+      }
+    },
+    {
+      "source": {
+        "table": "public.post_categories",
+        "column": "category_id"
+      },
+      "target": {
+        "table": "public.categories",
+        "column": "id"
+      }
+    },
+    {
+      "source": {
+        "table": "public.post_categories",
+        "column": "post_id"
+      },
+      "target": {
+        "table": "public.posts",
+        "column": "id"
+      }
+    },
+    {
+      "source": {
+        "table": "public.posts",
+        "column": "user_id"
+      },
+      "target": {
+        "table": "public.users",
+        "column": "id"
+      }
+    },
+    {
+      "source": {
+        "table": "public.user_roles",
+        "column": "role_id"
+      },
+      "target": {
+        "table": "public.roles",
+        "column": "id"
+      }
+    },
+    {
+      "source": {
+        "table": "public.user_roles",
+        "column": "user_id"
+      },
+      "target": {
+        "table": "public.users",
+        "column": "id"
+      }
+    }
+  ]
+}

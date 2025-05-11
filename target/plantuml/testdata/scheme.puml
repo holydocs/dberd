@@ -1,0 +1,60 @@
+@startuml
+!define table(x) class x << (T,#FFAAAA) >>
+!define primary_key(x) <b><u>x</u></b>
+!define foreign_key(x) <i>x</i>
+
+' Tables
+table(public.users) {
+  primary_key(id) : INT8 NOT NULL
+  name : VARCHAR(255) NOT NULL
+  email : VARCHAR(255) NOT NULL
+  created_at : TIMESTAMP DEFAULT current_timestamp()
+}
+table(public.roles) {
+  primary_key(id) : INT8 NOT NULL
+  name : VARCHAR(50) NOT NULL
+  description : STRING
+  created_at : TIMESTAMP DEFAULT current_timestamp()
+}
+table(public.user_roles) {
+  primary_key(user_id) : INT8 NOT NULL
+  primary_key(role_id) : INT8 NOT NULL
+  assigned_at : TIMESTAMP DEFAULT current_timestamp()
+}
+table(public.posts) {
+  primary_key(id) : INT8 NOT NULL
+  user_id : INT8 NOT NULL
+  title : VARCHAR(255) NOT NULL
+  content : STRING
+  created_at : TIMESTAMP DEFAULT current_timestamp()
+}
+table(public.categories) {
+  primary_key(id) : INT8 NOT NULL
+  name : VARCHAR(100) NOT NULL
+  description : STRING
+  parent_id : INT8
+  created_at : TIMESTAMP DEFAULT current_timestamp()
+}
+table(public.post_categories) {
+  primary_key(post_id) : INT8 NOT NULL
+  primary_key(category_id) : INT8 NOT NULL
+}
+table(public.comments) {
+  primary_key(id) : INT8 NOT NULL
+  post_id : INT8 NOT NULL
+  user_id : INT8 NOT NULL
+  content : STRING NOT NULL
+  created_at : TIMESTAMP DEFAULT current_timestamp()
+}
+
+' References
+public.categories }o--|| public.categories : parent_id references id
+public.comments }o--|| public.posts : post_id references id
+public.comments }o--|| public.users : user_id references id
+public.post_categories }o--|| public.categories : category_id references id
+public.post_categories }o--|| public.posts : post_id references id
+public.posts }o--|| public.users : user_id references id
+public.user_roles }o--|| public.roles : role_id references id
+public.user_roles }o--|| public.users : user_id references id
+
+@enduml 
