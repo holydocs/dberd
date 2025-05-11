@@ -21,7 +21,7 @@ var (
 )
 
 // Source represents a CockroachDB database source for schema extraction.
-// It maintains a database connection and implements the dberd.SchemeExtractor interface
+// It maintains a database connection and implements the dberd.SchemaExtractor interface
 // to provide schema information from a CockroachDB instance.
 type Source struct {
 	db     *sql.DB
@@ -65,20 +65,20 @@ func (s *Source) Close() error {
 	return s.closer.Close()
 }
 
-// ExtractScheme extracts the complete database schema including tables and their references.
-// It returns a dberd.Scheme containing all tables and their relationships.
-func (s *Source) ExtractScheme(ctx context.Context) (scheme dberd.Scheme, err error) {
-	scheme.Tables, err = s.extractTables(ctx)
+// ExtractSchema extracts the complete database schema including tables and their references.
+// It returns a dberd.Schema containing all tables and their relationships.
+func (s *Source) ExtractSchema(ctx context.Context) (schema dberd.Schema, err error) {
+	schema.Tables, err = s.extractTables(ctx)
 	if err != nil {
-		return dberd.Scheme{}, fmt.Errorf("extracting tables: %w", err)
+		return dberd.Schema{}, fmt.Errorf("extracting tables: %w", err)
 	}
 
-	scheme.References, err = s.extractReferences(ctx)
+	schema.References, err = s.extractReferences(ctx)
 	if err != nil {
-		return dberd.Scheme{}, fmt.Errorf("extracting references: %w", err)
+		return dberd.Schema{}, fmt.Errorf("extracting references: %w", err)
 	}
 
-	return scheme, nil
+	return schema, nil
 }
 
 const extractTablesQuery = `
@@ -158,12 +158,12 @@ func (s *Source) extractTables(ctx context.Context) ([]dberd.Table, error) {
 		return nil, fmt.Errorf("tables rows error: %w", err)
 	}
 
-	return tableRowsToSchemeTables(tablesRows), nil
+	return tableRowsToSchemaTables(tablesRows), nil
 }
 
-// tableRowsToSchemeTables converts a slice of tableRow into a slice of dberd.Table.
+// tableRowsToSchemaTables converts a slice of tableRow into a slice of dberd.Table.
 // It groups columns by table and constructs table definitions with their columns.
-func tableRowsToSchemeTables(tableRows []tableRow) []dberd.Table {
+func tableRowsToSchemaTables(tableRows []tableRow) []dberd.Table {
 	// Pre-allocate map with estimated size
 	tableMap := make(map[string]*dberd.Table, len(tableRows)/10) // Assuming average 10 columns per table
 
@@ -283,12 +283,12 @@ func (s *Source) extractReferences(ctx context.Context) ([]dberd.Reference, erro
 		return nil, fmt.Errorf("references rows error: %w", err)
 	}
 
-	return referenceRowsToSchemeReferences(referenceRows), nil
+	return referenceRowsToSchemaReferences(referenceRows), nil
 }
 
-// referenceRowsToSchemeReferences converts a slice of referenceRow into a slice of dberd.Reference.
+// referenceRowsToSchemaReferences converts a slice of referenceRow into a slice of dberd.Reference.
 // It constructs references between tables by combining schema and table names.
-func referenceRowsToSchemeReferences(referenceRows []referenceRow) []dberd.Reference {
+func referenceRowsToSchemaReferences(referenceRows []referenceRow) []dberd.Reference {
 	// Pre-allocate slice with exact size
 	references := make([]dberd.Reference, 0, len(referenceRows))
 

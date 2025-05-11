@@ -51,7 +51,6 @@ DBerd supports multiple output formats and diagramming tools:
 Here's a simple example of how to use DBerd as a library to extract a schema from CockroachDB and generate a D2 diagram:
 
 ```go
-func main() {
 package main
 
 import (
@@ -72,9 +71,9 @@ func main() {
 
 	ctx := context.Background()
 
-	scheme, err := cockroachSource.ExtractScheme(ctx)
+	schema, err := cockroachSource.ExtractSchema(ctx)
 	if err != nil {
-		panic(fmt.Errorf("extracting cockroach scheme: %w", err))
+		panic(fmt.Errorf("extracting cockroach schema: %w", err))
 	}
 
 	d2Target, err := d2.NewTarget()
@@ -82,14 +81,14 @@ func main() {
 		panic(fmt.Errorf("creating d2 target: %w", err))
 	}
 
-	formattedScheme, err := d2Target.FormatScheme(ctx, scheme)
+	formattedSchema, err := d2Target.FormatSchema(ctx, schema)
 	if err != nil {
-		panic(fmt.Errorf("formatting cockroach scheme into d2: %w", err))
+		panic(fmt.Errorf("formatting cockroach schema into d2: %w", err))
 	}
 
-	diagram, err := d2Target.RenderScheme(ctx, formattedScheme)
+	diagram, err := d2Target.RenderSchema(ctx, formattedSchema)
 	if err != nil {
-		panic(fmt.Errorf("rendering cockroach scheme into d2: %w", err))
+		panic(fmt.Errorf("rendering cockroach schema into d2: %w", err))
 	}
 
 	err = os.WriteFile("out.svg", diagram, 0600)
@@ -107,8 +106,8 @@ DBerd can be used as a command-line tool to extract and visualize database schem
 # Extract schema and generate D2 diagram
 dberd --source cockroach \
       --target d2 \
-      --format-to-file scheme.d2 \
-      --render-to-file scheme.svg \
+      --format-to-file schema.d2 \
+      --render-to-file schema.svg \
       --source-dsn "postgres://user@host:port/db?sslmode=disable"
 ```
 
@@ -178,7 +177,7 @@ COMMENT ON COLUMN roles.description IS 'Role description and permissions';
 COMMENT ON COLUMN categories.parent_id IS 'Self-referencing foreign key for category hierarchy';
 ```
 
-The resulting `scheme.d2` will be:
+The resulting `schema.d2` will be:
 ```
 direction: right
 
@@ -244,5 +243,5 @@ public.user_roles.role_id -> public.roles.id
 public.user_roles.user_id -> public.users.id
 ```
 
-And the resulting `scheme.svg` will be:
-![scheme](target/d2/testdata/scheme.svg)
+And the resulting `schema.svg` will be:
+![schema](target/d2/testdata/schema.svg)

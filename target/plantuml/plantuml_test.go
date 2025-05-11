@@ -11,14 +11,14 @@ import (
 )
 
 var (
-	//go:embed testdata/scheme.puml
-	testScheme []byte
+	//go:embed testdata/schema.puml
+	testSchema []byte
 )
 
-func TestFormatScheme(t *testing.T) {
+func TestFormatSchema(t *testing.T) {
 	t.Parallel()
 
-	scheme := dberd.Scheme{
+	schema := dberd.Schema{
 		Tables: []dberd.Table{
 			{
 				Name: "public.users",
@@ -101,12 +101,12 @@ func TestFormatScheme(t *testing.T) {
 	target, err := NewTarget()
 	require.NoError(t, err)
 
-	actual, err := target.FormatScheme(ctx, scheme)
+	actual, err := target.FormatSchema(ctx, schema)
 	require.NoError(t, err)
 
-	expected := dberd.FormattedScheme{
+	expected := dberd.FormattedSchema{
 		Type: "plantuml",
-		Data: testScheme,
+		Data: testSchema,
 	}
 	assert.Equal(t, expected, actual)
 }

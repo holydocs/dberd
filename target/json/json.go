@@ -1,4 +1,4 @@
-// Package json provides functionality for formatting database schemes as JSON.
+// Package json provides functionality for formatting database schemas as JSON.
 package json
 
 import (
@@ -18,7 +18,7 @@ var (
 	_ dberd.Target = (*Target)(nil)
 )
 
-// Target implements the scheme formatting and rendering functionality for JSON format.
+// Target implements the schema formatting and rendering functionality for JSON format.
 type Target struct {
 }
 
@@ -35,20 +35,20 @@ func (t *Target) Capabilities() dberd.TargetCapabilities {
 	}
 }
 
-// FormatScheme converts a database scheme into a JSON-formatted representation.
-// It returns a FormattedScheme containing the JSON data and format type.
-func (t *Target) FormatScheme(_ context.Context, s dberd.Scheme) (dberd.FormattedScheme, error) {
+// FormatSchema converts a database schema into a JSON-formatted representation.
+// It returns a FormattedSchema containing the JSON data and format type.
+func (t *Target) FormatSchema(_ context.Context, s dberd.Schema) (dberd.FormattedSchema, error) {
 	jsonData, err := json.MarshalIndent(s, "", "  ")
 	if err != nil {
-		return dberd.FormattedScheme{}, fmt.Errorf("mashalling scheme to json: %w", err)
+		return dberd.FormattedSchema{}, fmt.Errorf("marshalling schema to json: %w", err)
 	}
-	return dberd.FormattedScheme{
+	return dberd.FormattedSchema{
 		Type: targetType,
 		Data: jsonData,
 	}, nil
 }
 
-// RenderScheme is unsupported for json target.
-func (t *Target) RenderScheme(_ context.Context, _ dberd.FormattedScheme) ([]byte, error) {
+// RenderSchema is unsupported for json target.
+func (t *Target) RenderSchema(_ context.Context, _ dberd.FormattedSchema) ([]byte, error) {
 	return nil, errors.New("unsupported")
 }
