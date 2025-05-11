@@ -1,4 +1,4 @@
-// Package d2 provides functionality for converting database schemes into D2 diagram format.
+// Package d2 provides functionality for converting database schemas into D2 diagram format.
 // D2 is a modern diagram scripting language that turns text into diagrams.
 // This package implements the dberd.Target interface for D2 diagram generation.
 package d2
@@ -21,10 +21,10 @@ import (
 	"oss.terrastruct.com/util-go/go2"
 )
 
-// targetType defines the scheme format type for D2 diagrams
+// targetType defines the schema format type for D2 diagrams
 const targetType = dberd.TargetType("d2")
 
-//go:embed scheme.tmpl
+//go:embed schema.tmpl
 var templateFS embed.FS
 
 // Ensure Target implements dberd interfaces.
@@ -32,8 +32,8 @@ var (
 	_ dberd.Target = (*Target)(nil)
 )
 
-// Target represents a D2 diagram formatter that converts database schemes into D2 format.
-// It handles the conversion of database schemes to D2 diagrams and their subsequent rendering.
+// Target represents a D2 diagram formatter that converts database schemas into D2 format.
+// It handles the conversion of database schemas to D2 diagrams and their subsequent rendering.
 // The formatter uses an embedded template for diagram generation and supports customization
 // through various options for rendering and compilation.
 type Target struct {
@@ -63,11 +63,11 @@ func WithCompileOpts(compileOpts *d2lib.CompileOptions) TargetOpt {
 }
 
 // NewTarget creates a new D2 diagram formatter instance.
-// It initializes the template from the embedded scheme.tmpl file and sets up default
+// It initializes the template from the embedded schema.tmpl file and sets up default
 // rendering and compilation options. The formatter uses the ELK layout engine for
 // diagram arrangement.
 func NewTarget() (*Target, error) {
-	tmpl, err := template.ParseFS(templateFS, "scheme.tmpl")
+	tmpl, err := template.ParseFS(templateFS, "schema.tmpl")
 	if err != nil {
 		return nil, fmt.Errorf("parsing template: %w", err)
 	}
@@ -102,9 +102,9 @@ func (t *Target) Capabilities() dberd.TargetCapabilities {
 	}
 }
 
-// FormatScheme converts a database scheme into D2 diagram format.
-func (t *Target) FormatScheme(_ context.Context, s dberd.Scheme) (dberd.FormattedScheme, error) {
-	fs := dberd.FormattedScheme{
+// FormatSchema converts a database schema into D2 diagram format.
+func (t *Target) FormatSchema(_ context.Context, s dberd.Schema) (dberd.FormattedSchema, error) {
+	fs := dberd.FormattedSchema{
 		Type: targetType,
 	}
 
@@ -112,7 +112,7 @@ func (t *Target) FormatScheme(_ context.Context, s dberd.Scheme) (dberd.Formatte
 
 	err := t.template.Execute(&buf, s)
 	if err != nil {
-		return dberd.FormattedScheme{}, fmt.Errorf("executing template: %w", err)
+		return dberd.FormattedSchema{}, fmt.Errorf("executing template: %w", err)
 	}
 
 	fs.Data = buf.Bytes()
@@ -120,8 +120,8 @@ func (t *Target) FormatScheme(_ context.Context, s dberd.Scheme) (dberd.Formatte
 	return fs, nil
 }
 
-// RenderScheme renders a formatted D2 diagram to SVG format.
-func (t *Target) RenderScheme(ctx context.Context, s dberd.FormattedScheme) ([]byte, error) {
+// RenderSchema renders a formatted D2 diagram to SVG format.
+func (t *Target) RenderSchema(ctx context.Context, s dberd.FormattedSchema) ([]byte, error) {
 	if s.Type != targetType {
 		return nil, dberd.NewUnsupportedFormatError(s.Type, targetType)
 	}

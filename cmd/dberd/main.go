@@ -61,15 +61,15 @@ func main() {
 
 	ctx := context.Background()
 
-	scheme, err := source.ExtractScheme(ctx)
+	schema, err := source.ExtractSchema(ctx)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error: Extracting scheme %v\n", err)
+		fmt.Fprintf(os.Stderr, "Error: Extracting schema %v\n", err)
 		os.Exit(1)
 	}
 
-	fs, err := target.FormatScheme(ctx, scheme)
+	fs, err := target.FormatSchema(ctx, schema)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error: Formatting scheme %v\n", err)
+		fmt.Fprintf(os.Stderr, "Error: Formatting schema %v\n", err)
 		os.Exit(1)
 	}
 
@@ -82,9 +82,9 @@ func main() {
 	}
 
 	if *renderToFile != "" {
-		diagram, err := target.RenderScheme(ctx, fs)
+		diagram, err := target.RenderSchema(ctx, fs)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error: Rendering scheme %v\n", err)
+			fmt.Fprintf(os.Stderr, "Error: Rendering schema %v\n", err)
 			os.Exit(1)
 		}
 
@@ -121,5 +121,5 @@ func printUsage() {
 	fmt.Fprintf(os.Stderr, "Options:\n")
 	flag.PrintDefaults()
 	fmt.Fprintf(os.Stderr, "\nExample:\n")
-	fmt.Fprintf(os.Stderr, "  dberd --source cockroach --target d2 --format-to-file scheme.d2 --render-to-file scheme.svg --source-dsn \"connection-string\"\n")
+	fmt.Fprintf(os.Stderr, "  dberd --source cockroach --target d2 --format-to-file schema.d2 --render-to-file schema.svg --source-dsn \"connection-string\"\n")
 }

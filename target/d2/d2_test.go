@@ -11,17 +11,17 @@ import (
 )
 
 var (
-	//go:embed testdata/scheme.d2
-	testScheme []byte
+	//go:embed testdata/schema.d2
+	testSchema []byte
 
-	//go:embed testdata/scheme.svg
+	//go:embed testdata/schema.svg
 	testSVG []byte
 )
 
-func TestFormatScheme(t *testing.T) {
+func TestFormatSchema(t *testing.T) {
 	t.Parallel()
 
-	scheme := dberd.Scheme{
+	schema := dberd.Schema{
 		Tables: []dberd.Table{
 			{
 				Name: "public.users",
@@ -104,17 +104,17 @@ func TestFormatScheme(t *testing.T) {
 	target, err := NewTarget()
 	require.NoError(t, err)
 
-	actual, err := target.FormatScheme(ctx, scheme)
+	actual, err := target.FormatSchema(ctx, schema)
 	require.NoError(t, err)
 
-	expected := dberd.FormattedScheme{
+	expected := dberd.FormattedSchema{
 		Type: "d2",
-		Data: testScheme,
+		Data: testSchema,
 	}
 	assert.Equal(t, expected, actual)
 }
 
-func TestRenderScheme(t *testing.T) {
+func TestRenderSchema(t *testing.T) {
 	t.Parallel()
 
 	ctx := context.Background()
@@ -122,9 +122,9 @@ func TestRenderScheme(t *testing.T) {
 	target, err := NewTarget()
 	require.NoError(t, err)
 
-	actual, err := target.RenderScheme(ctx, dberd.FormattedScheme{
+	actual, err := target.RenderSchema(ctx, dberd.FormattedSchema{
 		Type: "d2",
-		Data: testScheme,
+		Data: testSchema,
 	})
 	require.NoError(t, err)
 

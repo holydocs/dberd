@@ -15,7 +15,7 @@ import (
 	"github.com/testcontainers/testcontainers-go/modules/cockroachdb"
 )
 
-func TestExtractScheme(t *testing.T) {
+func TestExtractSchema(t *testing.T) {
 	t.Parallel()
 
 	container, db := setupTestDB(t)
@@ -98,10 +98,10 @@ func TestExtractScheme(t *testing.T) {
 
 	// Create source and extract schema
 	source := NewSourceFromDB(db)
-	actual, err := source.ExtractScheme(ctx)
+	actual, err := source.ExtractSchema(ctx)
 	require.NoError(t, err)
 
-	expected := dberd.Scheme{
+	expected := dberd.Schema{
 		Tables: []dberd.Table{
 			{
 				Name: "public.users",
@@ -178,7 +178,7 @@ func TestExtractScheme(t *testing.T) {
 			{Source: dberd.TableColumn{Table: "public.user_roles", Column: "user_id"}, Target: dberd.TableColumn{Table: "public.users", Column: "id"}},
 		},
 	}
-	for _, s := range []dberd.Scheme{actual, expected} {
+	for _, s := range []dberd.Schema{actual, expected} {
 		sort.Slice(s.Tables, func(i, j int) bool {
 			return s.Tables[i].Name < s.Tables[j].Name
 		})

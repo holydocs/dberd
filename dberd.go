@@ -10,8 +10,8 @@ import (
 // TargetType represents the type of language for describing database schema.
 type TargetType string
 
-// Scheme represents a complete database schema with tables and their references.
-type Scheme struct {
+// Schema represents a complete database schema with tables and their references.
+type Schema struct {
 	Tables     []Table     `json:"tables"`
 	References []Reference `json:"references"`
 }
@@ -42,22 +42,22 @@ type Reference struct {
 	Target TableColumn `json:"target"`
 }
 
-// FormattedScheme represents a formatted database schema.
-type FormattedScheme struct {
+// FormattedSchema represents a formatted database schema.
+type FormattedSchema struct {
 	Type TargetType `json:"type"`
 	Data []byte     `json:"data"`
 }
 
 // Source defines the interface for database schema sources that can extract schema information.
 type Source interface {
-	SchemeExtractor
+	SchemaExtractor
 	io.Closer
 }
 
 // Target defines the interface for database schema targets that can format and render schema information.
 type Target interface {
-	SchemeFormatter
-	SchemeRenderer
+	SchemaFormatter
+	SchemaRenderer
 
 	Capabilities() TargetCapabilities
 }
@@ -68,19 +68,19 @@ type TargetCapabilities struct {
 	Render bool
 }
 
-// SchemeExtractor defines the interface for extracting database schema.
-type SchemeExtractor interface {
-	ExtractScheme(ctx context.Context) (Scheme, error)
+// SchemaExtractor defines the interface for extracting database schema.
+type SchemaExtractor interface {
+	ExtractSchema(ctx context.Context) (Schema, error)
 }
 
-// SchemeFormatter defines the interface for formatting database schema.
-type SchemeFormatter interface {
-	FormatScheme(ctx context.Context, s Scheme) (FormattedScheme, error)
+// SchemaFormatter defines the interface for formatting database schema.
+type SchemaFormatter interface {
+	FormatSchema(ctx context.Context, s Schema) (FormattedSchema, error)
 }
 
-// SchemeRenderer defines the interface for rendering formatted database schema.
-type SchemeRenderer interface {
-	RenderScheme(ctx context.Context, fs FormattedScheme) ([]byte, error)
+// SchemaRenderer defines the interface for rendering formatted database schema.
+type SchemaRenderer interface {
+	RenderSchema(ctx context.Context, fs FormattedSchema) ([]byte, error)
 }
 
 // UnsupportedFormatError represents an error when an unsupported format is provided.
