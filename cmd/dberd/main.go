@@ -125,5 +125,4 @@ func printUsage() {
 	flag.PrintDefaults()
 	fmt.Fprintf(os.Stderr, "\nExample:\n")
 	fmt.Fprintf(os.Stderr, "  dberd --source cockroach --target d2 --format-to-file schema.d2 --render-to-file schema.svg --source-dsn \"connection-string\"\n")
-	fmt.Fprintf(os.Stderr, "  dberd --source clickhouse --target d2 --format-to-file schema.d2 --render-to-file schema.svg --source-dsn \"connection-string\"\n")
 }

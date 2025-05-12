@@ -48,6 +48,12 @@ type FormattedSchema struct {
 	Data []byte     `json:"data"`
 }
 
+// TargetCapabilities represents the capabilities of a Target implementation.
+type TargetCapabilities struct {
+	Format bool
+	Render bool
+}
+
 // Source defines the interface for database schema sources that can extract schema information.
 type Source interface {
 	SchemaExtractor
@@ -58,14 +64,7 @@ type Source interface {
 type Target interface {
 	SchemaFormatter
 	SchemaRenderer
-
 	Capabilities() TargetCapabilities
-}
-
-// TargetCapabilities represents the capabilities of a Target implementation.
-type TargetCapabilities struct {
-	Format bool
-	Render bool
 }
 
 // SchemaExtractor defines the interface for extracting database schema.
