@@ -16,8 +16,8 @@ import (
 )
 
 func main() {
-	sourceType := flag.String("source", "", "Source database type (e.g., cockroach)")
-	targetType := flag.String("target", "", "Target type (e.g., d2)")
+	sourceType := flag.String("source", "", "Source database type (cockroach, clickhouse)")
+	targetType := flag.String("target", "", "Target type (d2, plantuml, json)")
 	formatToFile := flag.String("format-to-file", "", "Output file for the formatted schema")
 	renderToFile := flag.String("render-to-file", "", "Output file for the rendered diagram")
 	sourceDSN := flag.String("source-dsn", "", "Connection string for source database")

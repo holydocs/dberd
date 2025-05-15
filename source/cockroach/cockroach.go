@@ -110,8 +110,10 @@ const extractTablesQuery = `
 	        AND pk.column_name = c.column_name
 	    ) AS is_primary
 	FROM information_schema.columns c
+	JOIN information_schema.tables t ON c.table_schema = t.table_schema AND c.table_name = t.table_name
 	WHERE c.table_schema IN (SELECT schema_name FROM information_schema.schemata WHERE crdb_is_user_defined = 'YES')
 	AND is_hidden = 'NO'
+	AND t.table_type = 'BASE TABLE'
 	ORDER BY c.table_schema, c.table_name, c.ordinal_position;`
 
 type tableRow struct {
