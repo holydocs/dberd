@@ -1,6 +1,6 @@
 module github.com/denchenko/dberd
 
-go 1.24.2
+go 1.23.1
 
 require (
 	github.com/ClickHouse/clickhouse-go/v2 v2.34.0
