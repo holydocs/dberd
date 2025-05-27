@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"sort"
 )
 
 // TargetType represents the type of language for describing database schema.
@@ -14,6 +15,35 @@ type TargetType string
 type Schema struct {
 	Tables     []Table     `json:"tables"`
 	References []Reference `json:"references"`
+}
+
+// Sort sorts the schema's tables and references in a consistent order.
+func (s *Schema) Sort() {
+	sort.Slice(s.Tables, func(i, j int) bool {
+		return s.Tables[i].Name < s.Tables[j].Name
+	})
+
+	for i := range s.Tables {
+		sort.Slice(s.Tables[i].Columns, func(j, k int) bool {
+			if s.Tables[i].Columns[j].IsPrimary != s.Tables[i].Columns[k].IsPrimary {
+				return s.Tables[i].Columns[j].IsPrimary
+			}
+			return s.Tables[i].Columns[j].Name < s.Tables[i].Columns[k].Name
+		})
+	}
+
+	sort.Slice(s.References, func(i, j int) bool {
+		switch {
+		case s.References[i].Source.Table != s.References[j].Source.Table:
+			return s.References[i].Source.Table < s.References[j].Source.Table
+		case s.References[i].Source.Column != s.References[j].Source.Column:
+			return s.References[i].Source.Column < s.References[j].Source.Column
+		case s.References[i].Target.Table != s.References[j].Target.Table:
+			return s.References[i].Target.Table < s.References[j].Target.Table
+		default:
+			return s.References[i].Target.Column < s.References[j].Target.Column
+		}
+	})
 }
 
 // Table represents a database table with its columns.
