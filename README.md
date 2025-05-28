@@ -40,8 +40,9 @@ Currently, DBerd supports the following database sources:
 
 DBerd supports multiple output formats and diagramming tools:
 
-- **D2**: Generate diagrams using the D2 diagramming language
+- **D2**: Generate/render diagrams using the D2 diagramming language
 - **PlantUML**: Generate diagrams using PlantUML
+- **Mermaid**: Generate diagrams using Mermaid JS
 - **JSON**: Output schema in JSON format
 
 ## Usage
