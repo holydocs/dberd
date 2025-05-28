@@ -35,6 +35,7 @@ Currently, DBerd supports the following database sources:
 
 - **CockroachDB**: Extract schema from CockroachDB databases using the `cockroach` source type.
 - **ClickHouse**: Extract schema from ClickHouse databases using the `clickhouse` source type.
+- **MongoDB**: Extract collections from MongoDB databases using the `mongodb` source type.
 
 ## Supported Targets
 

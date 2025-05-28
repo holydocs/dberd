@@ -10,6 +10,7 @@ import (
 	"github.com/denchenko/dberd"
 	"github.com/denchenko/dberd/source/clickhouse"
 	"github.com/denchenko/dberd/source/cockroach"
+	"github.com/denchenko/dberd/source/mongodb"
 	"github.com/denchenko/dberd/target/d2"
 	"github.com/denchenko/dberd/target/json"
 	"github.com/denchenko/dberd/target/mermaid"
@@ -17,7 +18,7 @@ import (
 )
 
 func main() {
-	sourceType := flag.String("source", "", "Source database type (cockroach, clickhouse)")
+	sourceType := flag.String("source", "", "Source database type (cockroach, clickhouse, mongodb)")
 	targetType := flag.String("target", "", "Target type (d2, plantuml, json, mermaid)")
 	formatToFile := flag.String("format-to-file", "", "Output file for the formatted schema")
 	renderToFile := flag.String("render-to-file", "", "Output file for the rendered diagram")
@@ -104,6 +105,8 @@ func pickSource(sourceType, sourceDSN string) (dberd.Source, error) {
 		return cockroach.NewSource(sourceDSN)
 	case "clickhouse":
 		return clickhouse.NewSource(sourceDSN)
+	case "mongodb":
+		return mongodb.NewSource(sourceDSN)
 	}
 	return nil, errors.New("unknown source")
 }
