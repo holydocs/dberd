@@ -3,7 +3,6 @@ package mongodb
 import (
 	"context"
 	"log/slog"
-	"sort"
 	"testing"
 	"time"
 
@@ -70,10 +69,12 @@ func TestExtractSchema(t *testing.T) {
 		require.NoError(t, err)
 	}
 
-	// Create source and extract schema
 	source := NewSourceFromClient(client)
+
 	actual, err := source.ExtractSchema(ctx)
 	require.NoError(t, err)
+
+	actual.Sort()
 
 	expected := dberd.Schema{
 		Tables: []dberd.Table{
@@ -103,17 +104,7 @@ func TestExtractSchema(t *testing.T) {
 		},
 	}
 
-	// Sort tables and columns for consistent comparison
-	for _, s := range []dberd.Schema{actual, expected} {
-		sort.Slice(s.Tables, func(i, j int) bool {
-			return s.Tables[i].Name < s.Tables[j].Name
-		})
-		for _, table := range s.Tables {
-			sort.Slice(table.Columns, func(i, j int) bool {
-				return table.Columns[i].Name < table.Columns[j].Name
-			})
-		}
-	}
+	expected.Sort()
 
 	assert.Equal(t, expected, actual)
 }

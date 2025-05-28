@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"log/slog"
-	"sort"
 	"testing"
 	"time"
 
@@ -96,10 +95,12 @@ func TestExtractSchema(t *testing.T) {
 	`)
 	require.NoError(t, err)
 
-	// Create source and extract schema
 	source := NewSourceFromDB(db)
+
 	actual, err := source.ExtractSchema(ctx)
 	require.NoError(t, err)
+
+	actual.Sort()
 
 	expected := dberd.Schema{
 		Tables: []dberd.Table{
@@ -178,23 +179,9 @@ func TestExtractSchema(t *testing.T) {
 			{Source: dberd.TableColumn{Table: "public.user_roles", Column: "user_id"}, Target: dberd.TableColumn{Table: "public.users", Column: "id"}},
 		},
 	}
-	for _, s := range []dberd.Schema{actual, expected} {
-		sort.Slice(s.Tables, func(i, j int) bool {
-			return s.Tables[i].Name < s.Tables[j].Name
-		})
-		sort.Slice(s.References, func(i, j int) bool {
-			switch {
-			case s.References[i].Source.Table != s.References[j].Source.Table:
-				return s.References[i].Source.Table < s.References[j].Source.Table
-			case s.References[i].Source.Column != s.References[j].Source.Column:
-				return s.References[i].Source.Column < s.References[j].Source.Column
-			case s.References[i].Target.Table != s.References[j].Target.Table:
-				return s.References[i].Target.Table < s.References[j].Target.Table
-			default:
-				return s.References[i].Target.Column < s.References[j].Target.Column
-			}
-		})
-	}
+
+	expected.Sort()
+
 	assert.Equal(t, expected, actual)
 }
 
