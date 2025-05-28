@@ -2,8 +2,6 @@
 !define table(x) class x << (T,#FFAAAA) >>
 !define primary_key(x) <b><u>x</u></b>
 !define foreign_key(x) <i>x</i>
-
-' Tables
 table(public.users) {
   primary_key(id) : INT8 NOT NULL
   name : VARCHAR(255) NOT NULL
@@ -46,8 +44,6 @@ table(public.comments) {
   content : STRING NOT NULL
   created_at : TIMESTAMP DEFAULT current_timestamp()
 }
-
-' References
 public.categories }o--|| public.categories : parent_id references id
 public.comments }o--|| public.posts : post_id references id
 public.comments }o--|| public.users : user_id references id
@@ -56,5 +52,4 @@ public.post_categories }o--|| public.posts : post_id references id
 public.posts }o--|| public.users : user_id references id
 public.user_roles }o--|| public.roles : role_id references id
 public.user_roles }o--|| public.users : user_id references id
-
 @enduml 

@@ -1,0 +1,28 @@
+erDiagram
+    "public.users" {
+        INT8 NOT NULL id PK
+        VARCHAR(255) NOT NULL name
+        VARCHAR(255) NOT NULL email
+        TIMESTAMP DEFAULT current_timestamp() created_at
+    }
+    "public.roles" {
+        INT8 NOT NULL id PK
+        VARCHAR(50) NOT NULL name
+        STRING description
+        TIMESTAMP DEFAULT current_timestamp() created_at
+    }
+    "public.user_roles" {
+        INT8 NOT NULL user_id PK
+        INT8 NOT NULL role_id PK
+        TIMESTAMP DEFAULT current_timestamp() assigned_at
+    }
+    "public.posts" {
+        INT8 NOT NULL id PK
+        INT8 NOT NULL user_id
+        VARCHAR(255) NOT NULL title
+        STRING content
+        TIMESTAMP DEFAULT current_timestamp() created_at
+    }
+    "public.user_roles" }o--|| "public.roles" : "role_id -> id"
+    "public.user_roles" }o--|| "public.users" : "user_id -> id"
+    "public.posts" }o--|| "public.users" : "user_id -> id" 

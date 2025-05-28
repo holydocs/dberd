@@ -1,0 +1,13 @@
+erDiagram
+
+{{- range .Tables }}
+    "{{ .Name }}" {
+        {{- range .Columns }}
+        {{ .Definition }} {{ .Name }}{{ if .IsPrimary }} PK{{ end }}
+        {{- end }}
+    }
+{{- end }}
+
+{{- range .References }}
+    "{{ .Source.Table }}" }o--|| "{{ .Target.Table }}" : "{{ .Source.Column }} -> {{ .Target.Column }}"
+{{- end }} 
