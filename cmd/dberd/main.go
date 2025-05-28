@@ -12,12 +12,13 @@ import (
 	"github.com/denchenko/dberd/source/cockroach"
 	"github.com/denchenko/dberd/target/d2"
 	"github.com/denchenko/dberd/target/json"
+	"github.com/denchenko/dberd/target/mermaid"
 	"github.com/denchenko/dberd/target/plantuml"
 )
 
 func main() {
 	sourceType := flag.String("source", "", "Source database type (cockroach, clickhouse)")
-	targetType := flag.String("target", "", "Target type (d2, plantuml, json)")
+	targetType := flag.String("target", "", "Target type (d2, plantuml, json, mermaid)")
 	formatToFile := flag.String("format-to-file", "", "Output file for the formatted schema")
 	renderToFile := flag.String("render-to-file", "", "Output file for the rendered diagram")
 	sourceDSN := flag.String("source-dsn", "", "Connection string for source database")
@@ -115,6 +116,8 @@ func pickTarget(targetType string) (dberd.Target, error) {
 		return plantuml.NewTarget()
 	case "json":
 		return json.NewTarget(), nil
+	case "mermaid":
+		return mermaid.NewTarget()
 	}
 	return nil, errors.New("unknown target")
 }
