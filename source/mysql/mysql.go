@@ -1,6 +1,6 @@
-// Package cockroach provides functionality for extracting database schema information
-// from CockroachDB databases.
-package cockroach
+// Package mysql provides functionality for extracting database schema information
+// from MySQL databases.
+package mysql
 
 import (
 	"context"
@@ -9,8 +9,7 @@ import (
 	"io"
 
 	"github.com/denchenko/dberd"
-	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/stdlib"
+	_ "github.com/go-sql-driver/mysql" // import mysql driver
 )
 
 // Ensure Source implements dberd interfaces.
@@ -18,25 +17,18 @@ var (
 	_ dberd.Source = (*Source)(nil)
 )
 
-// Source represents a CockroachDB database source for schema extraction.
-// It maintains a database connection and implements the dberd.SchemaExtractor interface
-// to provide schema information from a CockroachDB instance.
+// Source represents a MySQL database source for schema extraction.
 type Source struct {
 	db     *sql.DB
 	closer io.Closer
 }
 
-// NewSource creates a new CockroachDB source from a connection string.
-// It parses the connection string, establishes a database connection,
-// and returns a new Source instance ready for schema extraction.
+// NewSource creates a new MySQL source from a connection string.
 func NewSource(connStr string) (*Source, error) {
-	cockroachConfig, err := pgx.ParseConfig(connStr)
+	db, err := sql.Open("mysql", connStr)
 	if err != nil {
-		return nil, fmt.Errorf("parsing cockroach connection string: %w", err)
+		return nil, fmt.Errorf("opening mysql connection: %w", err)
 	}
-
-	cockroachConnector := stdlib.GetConnector(*cockroachConfig)
-	db := sql.OpenDB(cockroachConnector)
 
 	return &Source{
 		db:     db,
@@ -44,7 +36,7 @@ func NewSource(connStr string) (*Source, error) {
 	}, nil
 }
 
-// NewSourceFromDB creates a new CockroachDB source from an existing database connection.
+// NewSourceFromDB creates a new MySQL source from an existing database connection.
 // This is useful when you want to reuse an existing database connection
 // for schema extraction purposes.
 func NewSourceFromDB(db *sql.DB) *Source {
@@ -64,7 +56,6 @@ func (s *Source) Close() error {
 }
 
 // ExtractSchema extracts the complete database schema including tables and their references.
-// It returns a dberd.Schema containing all tables and their relationships.
 func (s *Source) ExtractSchema(ctx context.Context) (schema dberd.Schema, err error) {
 	schema.Tables, err = s.extractTables(ctx)
 	if err != nil {
@@ -80,53 +71,31 @@ func (s *Source) ExtractSchema(ctx context.Context) (schema dberd.Schema, err er
 }
 
 const extractTablesQuery = `
-	WITH pk_columns AS (
-    	SELECT 
-    	    kcu.table_schema,
-    	    kcu.table_name,
-    	    kcu.column_name
-    	FROM information_schema.key_column_usage kcu
-    	JOIN information_schema.table_constraints tc
-    	    ON tc.constraint_name = kcu.constraint_name
-    	    AND tc.table_schema = kcu.table_schema
-    	WHERE tc.constraint_type = 'PRIMARY KEY'
-    	ORDER BY kcu.table_schema, kcu.table_name, kcu.column_name
-	)
-	SELECT
-	    c.table_schema,
-	    c.table_name,
-	    c.column_name,
-	    c.crdb_sql_type AS data_type,
-	    c.is_nullable,
-	    c.column_default,
-	    c.column_comment,
-	    EXISTS (
-	        SELECT 1 
-	        FROM pk_columns pk 
-	        WHERE pk.table_schema = c.table_schema 
-	        AND pk.table_name = c.table_name 
-	        AND pk.column_name = c.column_name
-	    ) AS is_primary
-	FROM information_schema.columns c
-	JOIN information_schema.tables t ON c.table_schema = t.table_schema AND c.table_name = t.table_name
-	WHERE c.table_schema IN (SELECT schema_name FROM information_schema.schemata WHERE crdb_is_user_defined = 'YES')
-	AND is_hidden = 'NO'
-	AND t.table_type = 'BASE TABLE'
-	ORDER BY c.table_schema, c.table_name, c.ordinal_position;`
+	SELECT 
+		TABLE_SCHEMA,
+		TABLE_NAME,
+		COLUMN_NAME,
+		COLUMN_TYPE,
+		IS_NULLABLE,
+		COLUMN_DEFAULT,
+		COLUMN_COMMENT,
+		COLUMN_KEY = 'PRI' as is_primary
+	FROM information_schema.COLUMNS
+	WHERE TABLE_SCHEMA NOT IN ('information_schema', 'performance_schema', 'mysql', 'sys')
+	ORDER BY TABLE_SCHEMA, TABLE_NAME, ORDINAL_POSITION;`
 
 type tableRow struct {
 	tableSchema   string
 	tableName     string
 	columnName    string
-	dataType      string
+	columnType    string
 	isNullable    string
 	columnDefault *string
-	columnComment *string
+	columnComment string
 	isPrimary     bool
 }
 
 // extractTables queries the database for table and column information and converts it to dberd.Table format.
-// It excludes system schemas and hidden columns.
 func (s *Source) extractTables(ctx context.Context) ([]dberd.Table, error) {
 	rows, err := s.db.QueryContext(ctx, extractTablesQuery)
 	if err != nil {
@@ -142,7 +111,7 @@ func (s *Source) extractTables(ctx context.Context) ([]dberd.Table, error) {
 			&r.tableSchema,
 			&r.tableName,
 			&r.columnName,
-			&r.dataType,
+			&r.columnType,
 			&r.isNullable,
 			&r.columnDefault,
 			&r.columnComment,
@@ -162,7 +131,6 @@ func (s *Source) extractTables(ctx context.Context) ([]dberd.Table, error) {
 }
 
 // tableRowsToSchemaTables converts a slice of tableRow into a slice of dberd.Table.
-// It groups columns by table and constructs table definitions with their columns.
 func tableRowsToSchemaTables(tableRows []tableRow) []dberd.Table {
 	// Pre-allocate map with estimated size
 	tableMap := make(map[string]*dberd.Table, len(tableRows)/10) // Assuming average 10 columns per table
@@ -174,12 +142,12 @@ func tableRowsToSchemaTables(tableRows []tableRow) []dberd.Table {
 		if !exists {
 			table = &dberd.Table{
 				Name:    tableKey,
-				Columns: make([]dberd.Column, 0, 10), // Pre-allocate for average column count
+				Columns: make([]dberd.Column, 0, 10),
 			}
 			tableMap[tableKey] = table
 		}
 
-		definition := row.dataType
+		definition := row.columnType
 		if row.isNullable == "NO" {
 			definition += " NOT NULL"
 		}
@@ -193,8 +161,8 @@ func tableRowsToSchemaTables(tableRows []tableRow) []dberd.Table {
 			IsPrimary:  row.isPrimary,
 		}
 
-		if row.columnComment != nil {
-			column.Comment = *row.columnComment
+		if row.columnComment != "" {
+			column.Comment = row.columnComment
 		}
 
 		table.Columns = append(table.Columns, column)
@@ -210,47 +178,25 @@ func tableRowsToSchemaTables(tableRows []tableRow) []dberd.Table {
 }
 
 const extractReferencesQuery = `
-	WITH foreign_keys AS (
-		SELECT
-			src_ns.nspname AS source_schema,
-			src_tbl.relname AS source_table,
-			src_col.attname AS source_column,
-			tgt_ns.nspname AS target_schema,
-			tgt_tbl.relname AS target_table,
-			tgt_col.attname AS target_column,
-			ROW_NUMBER() OVER (
-				PARTITION BY src_ns.nspname, src_tbl.relname, src_col.attname
-				ORDER BY tgt_ns.nspname, tgt_tbl.relname, tgt_col.attname
-			) as rn
-		FROM pg_constraint con
-		JOIN pg_class src_tbl ON con.conrelid = src_tbl.oid
-		JOIN pg_namespace src_ns ON src_tbl.relnamespace = src_ns.oid
-		JOIN pg_class tgt_tbl ON con.confrelid = tgt_tbl.oid
-		JOIN pg_namespace tgt_ns ON tgt_tbl.relnamespace = tgt_ns.oid
-		JOIN LATERAL unnest(con.conkey) WITH ORDINALITY AS src_cols(attnum, ord) ON TRUE
-		JOIN pg_attribute src_col ON src_col.attrelid = src_tbl.oid AND src_col.attnum = src_cols.attnum
-		JOIN LATERAL unnest(con.confkey) WITH ORDINALITY AS tgt_cols(attnum, ord) ON src_cols.ord = tgt_cols.ord
-		JOIN pg_attribute tgt_col ON tgt_col.attrelid = tgt_tbl.oid AND tgt_col.attnum = tgt_cols.attnum
-		WHERE con.contype = 'f'
-	)
 	SELECT 
-		source_schema,
-		source_table,
-		source_column,
-		target_schema,
-		target_table,
-		target_column
-	FROM foreign_keys
-	WHERE rn = 1
-	ORDER BY source_schema, source_table, source_column;`
+		TABLE_SCHEMA,
+		TABLE_NAME,
+		COLUMN_NAME,
+		REFERENCED_TABLE_SCHEMA,
+		REFERENCED_TABLE_NAME,
+		REFERENCED_COLUMN_NAME
+	FROM information_schema.KEY_COLUMN_USAGE
+	WHERE REFERENCED_TABLE_SCHEMA IS NOT NULL
+	AND TABLE_SCHEMA NOT IN ('information_schema', 'performance_schema', 'mysql', 'sys')
+	ORDER BY TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME;`
 
 type referenceRow struct {
-	sourceSchema string
-	sourceTable  string
-	sourceColumn string
-	targetSchema string
-	targetTable  string
-	targetColumn string
+	tableSchema         string
+	tableName           string
+	columnName          string
+	referencedSchema    string
+	referencedTableName string
+	referencedColumn    string
 }
 
 // extractReferences queries the database for foreign key relationships and converts them to dberd.Reference format.
@@ -261,17 +207,17 @@ func (s *Source) extractReferences(ctx context.Context) ([]dberd.Reference, erro
 	}
 	defer rows.Close()
 
-	var referenceRows []referenceRow
+	referenceRows := make([]referenceRow, 0, 50) // Assuming reasonable number of references
 
 	for rows.Next() {
 		var r referenceRow
 		if err := rows.Scan(
-			&r.sourceSchema,
-			&r.sourceTable,
-			&r.sourceColumn,
-			&r.targetSchema,
-			&r.targetTable,
-			&r.targetColumn,
+			&r.tableSchema,
+			&r.tableName,
+			&r.columnName,
+			&r.referencedSchema,
+			&r.referencedTableName,
+			&r.referencedColumn,
 		); err != nil {
 			return nil, fmt.Errorf("scanning references row: %w", err)
 		}
@@ -287,25 +233,21 @@ func (s *Source) extractReferences(ctx context.Context) ([]dberd.Reference, erro
 }
 
 // referenceRowsToSchemaReferences converts a slice of referenceRow into a slice of dberd.Reference.
-// It constructs references between tables by combining schema and table names.
 func referenceRowsToSchemaReferences(referenceRows []referenceRow) []dberd.Reference {
-	// Pre-allocate slice with exact size
 	references := make([]dberd.Reference, 0, len(referenceRows))
 
 	for _, row := range referenceRows {
-		sourceTable := row.sourceSchema + "." + row.sourceTable
-		targetTable := row.targetSchema + "." + row.targetTable
-
-		references = append(references, dberd.Reference{
+		reference := dberd.Reference{
 			Source: dberd.TableColumn{
-				Table:  sourceTable,
-				Column: row.sourceColumn,
+				Table:  row.tableSchema + "." + row.tableName,
+				Column: row.columnName,
 			},
 			Target: dberd.TableColumn{
-				Table:  targetTable,
-				Column: row.targetColumn,
+				Table:  row.referencedSchema + "." + row.referencedTableName,
+				Column: row.referencedColumn,
 			},
-		})
+		}
+		references = append(references, reference)
 	}
 
 	return references
