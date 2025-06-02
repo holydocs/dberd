@@ -12,6 +12,7 @@ require (
 	github.com/testcontainers/testcontainers-go/modules/cockroachdb v0.37.0
 	github.com/testcontainers/testcontainers-go/modules/mongodb v0.37.0
 	github.com/testcontainers/testcontainers-go/modules/mysql v0.37.0
+	github.com/testcontainers/testcontainers-go/modules/postgres v0.37.0
 	go.mongodb.org/mongo-driver v1.14.0
 	oss.terrastruct.com/d2 v0.7.0
 	oss.terrastruct.com/util-go v0.0.0-20250213174338-243d8661088a

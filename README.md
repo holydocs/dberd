@@ -33,6 +33,7 @@ go install github.com/denchenko/dberd/cmd/dberd@latest
 
 Currently, DBerd supports the following database sources:
 
+- **PostgreSQL**: Extract schema from PostgreSQL databases using the `postgres` source type;
 - **MySQL**: Extract schema from MySQL databases using the `mysql` source type;
 - **CockroachDB**: Extract schema from CockroachDB databases using the `cockroach` source type;
 - **ClickHouse**: Extract schema from ClickHouse databases using the `clickhouse` source type;

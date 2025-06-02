@@ -188,8 +188,8 @@ func TestExtractSchema(t *testing.T) {
 func setupTestDB(t *testing.T) (testcontainers.Container, *sql.DB) {
 	ctx := context.Background()
 
-	container, err := cockroachdb.RunContainer(ctx,
-		testcontainers.WithImage("cockroachdb/cockroach:latest-v23.1"),
+	container, err := cockroachdb.Run(ctx,
+		"cockroachdb/cockroach:latest-v23.1",
 	)
 	require.NoError(t, err)
 

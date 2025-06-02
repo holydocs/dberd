@@ -112,7 +112,7 @@ func TestExtractSchema(t *testing.T) {
 func setupTestDB(t *testing.T) (testcontainers.Container, *mongo.Client) {
 	ctx := context.Background()
 
-	container, err := mongodb.RunContainer(ctx)
+	container, err := mongodb.Run(ctx, "mongo:6")
 	require.NoError(t, err)
 
 	connStr, err := container.ConnectionString(ctx)
