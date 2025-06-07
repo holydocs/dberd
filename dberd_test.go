@@ -197,6 +197,49 @@ func TestSchema_Sort(t *testing.T) {
 			},
 		},
 		{
+			name: "sorts columns considering definition",
+			schema: Schema{
+				Tables: []Table{
+					{
+						Name: "test_table",
+						Columns: []Column{
+							{Name: "z_column", Definition: "text"},
+							{Name: "a_column", Definition: "varchar(255)"},
+							{Name: "id", Definition: "int", IsPrimary: true},
+							{Name: "created_at", Definition: "timestamp"},
+							{Name: "b_column", Definition: "text"},
+							{Name: "updated_at", Definition: "timestamp"},
+							{Name: "status", Definition: "varchar(50)"},
+							{Name: "deleted_at", Definition: "timestamp"},
+							{Name: "name", Definition: "varchar(255)"},
+							{Name: "description", Definition: "text"},
+							{Name: "version", Definition: "int"},
+						},
+					},
+				},
+			},
+			expected: Schema{
+				Tables: []Table{
+					{
+						Name: "test_table",
+						Columns: []Column{
+							{Name: "id", Definition: "int", IsPrimary: true},
+							{Name: "version", Definition: "int"},
+							{Name: "b_column", Definition: "text"},
+							{Name: "description", Definition: "text"},
+							{Name: "z_column", Definition: "text"},
+							{Name: "created_at", Definition: "timestamp"},
+							{Name: "deleted_at", Definition: "timestamp"},
+							{Name: "updated_at", Definition: "timestamp"},
+							{Name: "a_column", Definition: "varchar(255)"},
+							{Name: "name", Definition: "varchar(255)"},
+							{Name: "status", Definition: "varchar(50)"},
+						},
+					},
+				},
+			},
+		},
+		{
 			name: "empty schema",
 			schema: Schema{
 				Tables:     []Table{},

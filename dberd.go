@@ -28,6 +28,9 @@ func (s *Schema) Sort() {
 			if s.Tables[i].Columns[j].IsPrimary != s.Tables[i].Columns[k].IsPrimary {
 				return s.Tables[i].Columns[j].IsPrimary
 			}
+			if s.Tables[i].Columns[j].Definition != s.Tables[i].Columns[k].Definition {
+				return s.Tables[i].Columns[j].Definition < s.Tables[i].Columns[k].Definition
+			}
 			return s.Tables[i].Columns[j].Name < s.Tables[i].Columns[k].Name
 		})
 	}
