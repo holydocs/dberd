@@ -4,7 +4,7 @@ go 1.23.1
 
 require (
 	github.com/ClickHouse/clickhouse-go/v2 v2.36.0
-	github.com/go-sql-driver/mysql v1.9.2
+	github.com/go-sql-driver/mysql v1.9.3
 	github.com/jackc/pgx/v5 v5.7.5
 	github.com/stretchr/testify v1.10.0
 	github.com/testcontainers/testcontainers-go v0.37.0
