@@ -7,12 +7,12 @@ require (
 	github.com/go-sql-driver/mysql v1.9.2
 	github.com/jackc/pgx/v5 v5.7.5
 	github.com/stretchr/testify v1.10.0
-	github.com/testcontainers/testcontainers-go v0.37.0
+	github.com/testcontainers/testcontainers-go v0.38.0
 	github.com/testcontainers/testcontainers-go/modules/clickhouse v0.37.0
 	github.com/testcontainers/testcontainers-go/modules/cockroachdb v0.37.0
 	github.com/testcontainers/testcontainers-go/modules/mongodb v0.37.0
 	github.com/testcontainers/testcontainers-go/modules/mysql v0.37.0
-	github.com/testcontainers/testcontainers-go/modules/postgres v0.37.0
+	github.com/testcontainers/testcontainers-go/modules/postgres v0.38.0
 	go.mongodb.org/mongo-driver v1.17.4
 	oss.terrastruct.com/d2 v0.7.0
 	oss.terrastruct.com/util-go v0.0.0-20250213174338-243d8661088a
@@ -41,7 +41,7 @@ require (
 	github.com/docker/go-connections v0.5.0 // indirect
 	github.com/docker/go-units v0.5.0 // indirect
 	github.com/dop251/goja v0.0.0-20240927123429-241b342198c2 // indirect
-	github.com/ebitengine/purego v0.8.2 // indirect
+	github.com/ebitengine/purego v0.8.4 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/go-faster/city v1.0.1 // indirect
 	github.com/go-faster/errors v0.7.1 // indirect
@@ -82,7 +82,7 @@ require (
 	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/rogpeppe/go-internal v1.14.1 // indirect
 	github.com/segmentio/asm v1.2.0 // indirect
-	github.com/shirou/gopsutil/v4 v4.25.3 // indirect
+	github.com/shirou/gopsutil/v4 v4.25.5 // indirect
 	github.com/shopspring/decimal v1.4.0 // indirect
 	github.com/sirupsen/logrus v1.9.3 // indirect
 	github.com/tklauser/go-sysconf v0.3.15 // indirect
