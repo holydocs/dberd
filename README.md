@@ -29,6 +29,12 @@ go get github.com/holydocs/dberd
 go install github.com/holydocs/dberd/cmd/dberd@latest
 ```
 
+### Docker
+
+```bash
+docker pull ghcr.io/holydocs/dberd:latest
+```
+
 ## Supported Sources
 
 Currently, DBerd supports the following database sources:
@@ -113,6 +119,16 @@ dberd --source cockroach \
       --format-to-file schema.d2 \
       --render-to-file schema.svg \
       --source-dsn "postgres://user@host:port/db?sslmode=disable"
+```
+
+Or using Docker:
+```bash
+docker run --rm -v $(pwd):/work ghcr.io/holydocs/dberd:latest \
+  --source cockroach \
+  --target d2 \
+  --format-to-file /work/schema.d2 \
+  --render-to-file /work/schema.svg \
+  --source-dsn "postgres://user@host:port/db?sslmode=disable"
 ```
 
 For example, if a Cockroach database has a schema like:
