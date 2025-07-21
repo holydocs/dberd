@@ -3,7 +3,7 @@ BUILD_PATH=./bin
 GOLANGCI_LINT=$(BUILD_PATH)/golangci-lint
 GOLANGCI_LINT_VERSION=v2.1.6
 
-.PHONY: build clean test lint help
+.PHONY: build clean test lint help docker
 
 build: ## build app
 	$(GO) build -o $(BUILD_PATH)/dberd ./cmd/dberd
@@ -20,6 +20,9 @@ lint: $(GOLANGCI_LINT) ## run linters
 
 $(GOLANGCI_LINT): ## install local golangci-lint
 	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/$(GOLANGCI_LINT_VERSION)/install.sh | sh -s -- -b $(BUILD_PATH) $(GOLANGCI_LINT_VERSION)
+
+docker: ## build docker image
+	docker build -t dberd:latest .
 
 # self documenting command
 help:
