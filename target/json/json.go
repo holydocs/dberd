@@ -7,7 +7,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/denchenko/dberd"
+	"github.com/holydocs/dberd"
 )
 
 // targetType represents the JSON format type identifier.

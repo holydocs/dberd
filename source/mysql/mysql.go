@@ -8,8 +8,8 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/denchenko/dberd"
 	_ "github.com/go-sql-driver/mysql" // import mysql driver
+	"github.com/holydocs/dberd"
 )
 
 // Ensure Source implements dberd interfaces.

@@ -11,7 +11,7 @@ import (
 	"fmt"
 	"text/template"
 
-	"github.com/denchenko/dberd"
+	"github.com/holydocs/dberd"
 )
 
 // targetType defines the schema format type for PlantUML diagrams

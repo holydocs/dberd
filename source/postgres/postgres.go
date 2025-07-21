@@ -9,7 +9,7 @@ import (
 	"io"
 	"strings"
 
-	"github.com/denchenko/dberd"
+	"github.com/holydocs/dberd"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/stdlib"
 )

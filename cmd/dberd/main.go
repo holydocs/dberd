@@ -7,16 +7,16 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/denchenko/dberd"
-	"github.com/denchenko/dberd/source/clickhouse"
-	"github.com/denchenko/dberd/source/cockroach"
-	"github.com/denchenko/dberd/source/mongodb"
-	"github.com/denchenko/dberd/source/mysql"
-	"github.com/denchenko/dberd/source/postgres"
-	"github.com/denchenko/dberd/target/d2"
-	"github.com/denchenko/dberd/target/json"
-	"github.com/denchenko/dberd/target/mermaid"
-	"github.com/denchenko/dberd/target/plantuml"
+	"github.com/holydocs/dberd"
+	"github.com/holydocs/dberd/source/clickhouse"
+	"github.com/holydocs/dberd/source/cockroach"
+	"github.com/holydocs/dberd/source/mongodb"
+	"github.com/holydocs/dberd/source/mysql"
+	"github.com/holydocs/dberd/source/postgres"
+	"github.com/holydocs/dberd/target/d2"
+	"github.com/holydocs/dberd/target/json"
+	"github.com/holydocs/dberd/target/mermaid"
+	"github.com/holydocs/dberd/target/plantuml"
 )
 
 func main() {

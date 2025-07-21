@@ -1,4 +1,4 @@
-module github.com/denchenko/dberd
+module github.com/holydocs/dberd
 
 go 1.23.1
 

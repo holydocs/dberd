@@ -10,7 +10,7 @@ import (
 	"fmt"
 	"text/template"
 
-	"github.com/denchenko/dberd"
+	"github.com/holydocs/dberd"
 	"oss.terrastruct.com/d2/d2graph"
 	"oss.terrastruct.com/d2/d2layouts/d2elklayout"
 	"oss.terrastruct.com/d2/d2lib"

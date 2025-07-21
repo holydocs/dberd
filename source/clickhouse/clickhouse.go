@@ -9,7 +9,7 @@ import (
 	"io"
 
 	_ "github.com/ClickHouse/clickhouse-go/v2" // import clickhouse driver
-	"github.com/denchenko/dberd"
+	"github.com/holydocs/dberd"
 )
 
 // Ensure Source implements dberd interfaces.

@@ -5,7 +5,7 @@ import (
 	_ "embed"
 	"testing"
 
-	"github.com/denchenko/dberd"
+	"github.com/holydocs/dberd"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

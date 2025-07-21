@@ -1,8 +1,8 @@
 # DBerd
 
-[![Run Tests](https://github.com/denchenko/dberd/actions/workflows/go.yml/badge.svg?branch=main)](https://github.com/denchenko/dberd/actions/workflows/go.yml)
-[![Go Report Card](https://goreportcard.com/badge/github.com/denchenko/dberd)](https://goreportcard.com/report/github.com/denchenko/dberd)
-[![GoDoc](https://godoc.org/github.com/denchenko/dberd?status.svg)](https://godoc.org/github.com/denchenko/dberd)
+[![Run Tests](https://github.com/holydocs/dberd/actions/workflows/go.yml/badge.svg?branch=main)](https://github.com/holydocs/dberd/actions/workflows/go.yml)
+[![Go Report Card](https://goreportcard.com/badge/github.com/holydocs/dberd)](https://goreportcard.com/report/github.com/holydocs/dberd)
+[![GoDoc](https://godoc.org/github.com/holydocs/dberd?status.svg)](https://godoc.org/github.com/holydocs/dberd)
 
 DBerd is a Go library and command-line tool that helps you extract database schemas and generate diagrams. It provides a flexible and extensible way to work with different database sources and output formats.
 
@@ -19,14 +19,14 @@ DBerd is a Go library and command-line tool that helps you extract database sche
 ### As a Library
 
 ```bash
-go get github.com/denchenko/dberd
+go get github.com/holydocs/dberd
 ```
 
 ### As a CLI Tool
 
 ```bash
 # Using Go
-go install github.com/denchenko/dberd/cmd/dberd@latest
+go install github.com/holydocs/dberd/cmd/dberd@latest
 ```
 
 ## Supported Sources
@@ -62,8 +62,8 @@ import (
 	"log"
 	"os"
 
-	"github.com/denchenko/dberd/source/cockroach"
-	"github.com/denchenko/dberd/target/d2"
+	"github.com/holydocs/dberd/source/cockroach"
+	"github.com/holydocs/dberd/target/d2"
 )
 
 func main() {

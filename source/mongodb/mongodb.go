@@ -9,7 +9,7 @@ import (
 	"io"
 	"strings"
 
-	"github.com/denchenko/dberd"
+	"github.com/holydocs/dberd"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
