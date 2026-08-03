@@ -310,8 +310,8 @@ func TestSchema_SkipTables(t *testing.T) {
 			expected: Schema{
 				Tables: []Table{
 					{Name: "public.users"},
-					{Name: "audit.goose_db_version"},
 					{Name: "public.schema_migrations"},
+					{Name: "audit.goose_db_version"},
 				},
 				References: []Reference{usersToMigrations, usersToUsers},
 			},
