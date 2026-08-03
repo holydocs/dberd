@@ -259,3 +259,96 @@ func TestSchema_Sort(t *testing.T) {
 		})
 	}
 }
+
+func TestSchema_SkipTables(t *testing.T) {
+	t.Parallel()
+
+	usersToGoose := Reference{
+		Source: TableColumn{Table: "public.users", Column: "id"},
+		Target: TableColumn{Table: "public.goose_db_version", Column: "id"},
+	}
+	usersToMigrations := Reference{
+		Source: TableColumn{Table: "public.users", Column: "id"},
+		Target: TableColumn{Table: "public.schema_migrations", Column: "id"},
+	}
+	usersToUsers := Reference{
+		Source: TableColumn{Table: "public.users", Column: "manager_id"},
+		Target: TableColumn{Table: "public.users", Column: "id"},
+	}
+
+	newSchema := func() Schema {
+		return Schema{
+			Tables: []Table{
+				{Name: "public.users"},
+				{Name: "public.goose_db_version"},
+				{Name: "public.schema_migrations"},
+				{Name: "audit.goose_db_version"},
+			},
+			References: []Reference{usersToGoose, usersToMigrations, usersToUsers},
+		}
+	}
+
+	tests := []struct {
+		name       string
+		skipTables []string
+		expected   Schema
+	}{
+		{
+			name:       "unqualified name matches every schema",
+			skipTables: []string{"goose_db_version"},
+			expected: Schema{
+				Tables: []Table{
+					{Name: "public.users"},
+					{Name: "public.schema_migrations"},
+				},
+				References: []Reference{usersToMigrations, usersToUsers},
+			},
+		},
+		{
+			name:       "qualified name matches one schema",
+			skipTables: []string{"public.goose_db_version"},
+			expected: Schema{
+				Tables: []Table{
+					{Name: "public.users"},
+					{Name: "audit.goose_db_version"},
+					{Name: "public.schema_migrations"},
+				},
+				References: []Reference{usersToMigrations, usersToUsers},
+			},
+		},
+		{
+			name:       "multiple names trim whitespace and ignore duplicates",
+			skipTables: []string{" goose_db_version", "schema_migrations ", "goose_db_version", ""},
+			expected: Schema{
+				Tables:     []Table{{Name: "public.users"}},
+				References: []Reference{usersToUsers},
+			},
+		},
+		{
+			name:       "unknown name leaves schema unchanged",
+			skipTables: []string{"unknown"},
+			expected:   newSchema(),
+		},
+		{
+			name:       "matching is case-sensitive",
+			skipTables: []string{"GOOSE_DB_VERSION"},
+			expected:   newSchema(),
+		},
+		{
+			name:       "empty input leaves schema unchanged",
+			skipTables: []string{"", " "},
+			expected:   newSchema(),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			actual := newSchema()
+			actual.SkipTables(tt.skipTables...)
+
+			assert.Equal(t, tt.expected, actual)
+		})
+	}
+}

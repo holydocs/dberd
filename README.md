@@ -86,6 +86,9 @@ func main() {
 		log.Fatalf("extracting cockroach schema: %v", err)
 	}
 
+	schema.SkipTables("goose_db_version")
+	schema.Sort()
+
 	d2Target, err := d2.NewTarget()
 	if err != nil {
 		log.Fatalf("creating d2 target: %v", err)
@@ -118,8 +121,13 @@ dberd --source cockroach \
       --target d2 \
       --format-to-file schema.d2 \
       --render-to-file schema.svg \
+      --skip-tables goose_db_version,schema_migrations \
       --source-dsn "postgres://user@host:port/db?sslmode=disable"
 ```
+
+Use `--skip-tables` to omit a comma-separated list of tables from the output.
+Unqualified names, such as `goose_db_version`, match that table in every schema;
+qualified names, such as `public.goose_db_version`, match only that exact table.
 
 Or using Docker:
 ```bash

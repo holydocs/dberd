@@ -6,6 +6,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/holydocs/dberd"
 	"github.com/holydocs/dberd/source/clickhouse"
@@ -25,6 +26,7 @@ func main() {
 	formatToFile := flag.String("format-to-file", "", "Output file for the formatted schema")
 	renderToFile := flag.String("render-to-file", "", "Output file for the rendered diagram")
 	sourceDSN := flag.String("source-dsn", "", "Connection string for source database")
+	skipTables := flag.String("skip-tables", "", "Comma-separated table names to omit from the output schema")
 
 	help := flag.Bool("help", false, "Show help")
 
@@ -71,6 +73,8 @@ func main() {
 		fmt.Fprintf(os.Stderr, "Error: Extracting schema %v\n", err)
 		os.Exit(1)
 	}
+
+	schema.SkipTables(strings.Split(*skipTables, ",")...)
 	schema.Sort()
 
 	fs, err := target.FormatSchema(ctx, schema)
@@ -80,7 +84,7 @@ func main() {
 	}
 
 	if *formatToFile != "" {
-		err = os.WriteFile(*formatToFile, fs.Data, 0600)
+		err = os.WriteFile(*formatToFile, fs.Data, 0o600)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error : Writing to file %v\n", err)
 			os.Exit(1)
@@ -94,7 +98,7 @@ func main() {
 			os.Exit(1)
 		}
 
-		err = os.WriteFile(*renderToFile, diagram, 0600)
+		err = os.WriteFile(*renderToFile, diagram, 0o600)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error: Writing to file %v\n", err)
 			os.Exit(1)
