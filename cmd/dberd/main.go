@@ -71,6 +71,7 @@ func main() {
 		fmt.Fprintf(os.Stderr, "Error: Extracting schema %v\n", err)
 		os.Exit(1)
 	}
+	schema.Sort()
 
 	fs, err := target.FormatSchema(ctx, schema)
 	if err != nil {
