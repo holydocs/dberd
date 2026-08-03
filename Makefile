@@ -1,7 +1,7 @@
 GO=go
 BUILD_PATH=./bin
 GOLANGCI_LINT=$(BUILD_PATH)/golangci-lint
-GOLANGCI_LINT_VERSION=v2.1.6
+GOLANGCI_LINT_VERSION=v2.10.1
 
 .PHONY: build clean test lint help docker
 
