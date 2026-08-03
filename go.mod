@@ -1,6 +1,6 @@
 module github.com/holydocs/dberd
 
-go 1.23.1
+go 1.26.4
 
 require (
 	github.com/ClickHouse/clickhouse-go/v2 v2.36.0
