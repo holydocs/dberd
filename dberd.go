@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"sort"
+	"strings"
 )
 
 // TargetType represents the type of language for describing database schema.
@@ -47,6 +48,59 @@ func (s *Schema) Sort() {
 			return s.References[i].Target.Column < s.References[j].Target.Column
 		}
 	})
+}
+
+// SkipTables removes tables with the given names and all references to them.
+// An unqualified name matches tables in every schema, while a qualified name
+// matches only the exact table name. Names are case-sensitive; surrounding
+// whitespace and empty names are ignored.
+func (s *Schema) SkipTables(names ...string) {
+	skipped := make(map[string]struct{}, len(names))
+	for _, name := range names {
+		name = strings.TrimSpace(name)
+		if name != "" {
+			skipped[name] = struct{}{}
+		}
+	}
+
+	if len(skipped) == 0 {
+		return
+	}
+
+	if s.Tables != nil {
+		tables := make([]Table, 0, len(s.Tables))
+		for _, table := range s.Tables {
+			if !isSkippedTable(table.Name, skipped) {
+				tables = append(tables, table)
+			}
+		}
+		s.Tables = tables
+	}
+
+	if s.References != nil {
+		references := make([]Reference, 0, len(s.References))
+		for _, reference := range s.References {
+			if !isSkippedTable(reference.Source.Table, skipped) &&
+				!isSkippedTable(reference.Target.Table, skipped) {
+				references = append(references, reference)
+			}
+		}
+		s.References = references
+	}
+}
+
+func isSkippedTable(table string, skipped map[string]struct{}) bool {
+	if _, ok := skipped[table]; ok {
+		return true
+	}
+
+	baseName := table
+	if separator := strings.LastIndexByte(table, '.'); separator >= 0 {
+		baseName = table[separator+1:]
+	}
+
+	_, ok := skipped[baseName]
+	return ok
 }
 
 // Table represents a database table with its columns.
