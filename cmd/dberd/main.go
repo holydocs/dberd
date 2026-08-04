@@ -27,6 +27,7 @@ func main() {
 	renderToFile := flag.String("render-to-file", "", "Output file for the rendered diagram")
 	sourceDSN := flag.String("source-dsn", "", "Connection string for source database")
 	skipTables := flag.String("skip-tables", "", "Comma-separated table names to omit from the output schema")
+	addLogicalReferences := flag.Bool("add-logical-references", false, "Infer references from <table>_id column names")
 
 	help := flag.Bool("help", false, "Show help")
 
@@ -75,6 +76,9 @@ func main() {
 	}
 
 	schema.SkipTables(strings.Split(*skipTables, ",")...)
+	if *addLogicalReferences {
+		schema.AddLogicalReferences()
+	}
 	schema.Sort()
 
 	fs, err := target.FormatSchema(ctx, schema)

@@ -122,6 +122,7 @@ dberd --source cockroach \
       --format-to-file schema.d2 \
       --render-to-file schema.svg \
       --skip-tables goose_db_version,schema_migrations \
+      --add-logical-references \
       --source-dsn "postgres://user@host:port/db?sslmode=disable"
 ```
 

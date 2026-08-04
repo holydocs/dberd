@@ -50,6 +50,97 @@ func (s *Schema) Sort() {
 	})
 }
 
+// AddLogicalReferences adds references inferred from <table>_id column names.
+// Existing references take precedence, and targets must be in the same schema.
+func (s *Schema) AddLogicalReferences() {
+	type tableAlias struct {
+		qualifier string
+		name      string
+	}
+
+	referencedSources := make(map[TableColumn]struct{}, len(s.References))
+	for _, reference := range s.References {
+		referencedSources[reference.Source] = struct{}{}
+	}
+
+	targetsByAlias := make(map[tableAlias][]TableColumn)
+	for _, table := range s.Tables {
+		if !tableHasColumn(table, "id") {
+			continue
+		}
+
+		qualifier, name := splitTableName(table.Name)
+		target := TableColumn{Table: table.Name, Column: "id"}
+		for _, alias := range logicalTableAliases(name) {
+			key := tableAlias{qualifier: qualifier, name: alias}
+			targetsByAlias[key] = append(targetsByAlias[key], target)
+		}
+	}
+
+	for _, table := range s.Tables {
+		qualifier, _ := splitTableName(table.Name)
+		for _, column := range table.Columns {
+			stem, ok := strings.CutSuffix(column.Name, "_id")
+			if !ok || stem == "" {
+				continue
+			}
+
+			source := TableColumn{Table: table.Name, Column: column.Name}
+			if _, ok := referencedSources[source]; ok {
+				continue
+			}
+
+			targets := targetsByAlias[tableAlias{qualifier: qualifier, name: stem}]
+			if len(targets) != 1 {
+				continue
+			}
+
+			s.References = append(s.References, Reference{Source: source, Target: targets[0]})
+			referencedSources[source] = struct{}{}
+		}
+	}
+}
+
+func splitTableName(name string) (string, string) {
+	separator := strings.LastIndexByte(name, '.')
+	if separator == -1 {
+		return "", name
+	}
+
+	return name[:separator], name[separator+1:]
+}
+
+func logicalTableAliases(name string) []string {
+	if name == "" {
+		return nil
+	}
+
+	aliases := []string{name}
+	var singular string
+	switch {
+	case strings.HasSuffix(name, "ies"):
+		singular = strings.TrimSuffix(name, "ies") + "y"
+	case strings.HasSuffix(name, "s"):
+		singular = strings.TrimSuffix(name, "s")
+	}
+
+	if singular != "" && singular != name {
+		aliases = append(aliases, singular)
+	}
+
+	return aliases
+}
+
+func tableHasColumn(table Table, name string) bool {
+	for _, column := range table.Columns {
+		if column.Name == name {
+			return true
+		}
+	}
+
+	return false
+}
+
 // SkipTables removes tables with the given names and all references to them.
 // An unqualified name matches tables in every schema, while a qualified name
 // matches only the exact table name. Names are case-sensitive; surrounding

@@ -352,3 +352,167 @@ func TestSchema_SkipTables(t *testing.T) {
 		})
 	}
 }
+
+func TestSchema_AddLogicalReferences(t *testing.T) {
+	t.Parallel()
+
+	table := func(name string, columns ...string) Table {
+		result := Table{
+			Name:    name,
+			Columns: make([]Column, 0, len(columns)),
+		}
+		for _, column := range columns {
+			result.Columns = append(result.Columns, Column{Name: column})
+		}
+		return result
+	}
+	reference := func(sourceTable, sourceColumn, targetTable string) Reference {
+		return Reference{
+			Source: TableColumn{Table: sourceTable, Column: sourceColumn},
+			Target: TableColumn{Table: targetTable, Column: "id"},
+		}
+	}
+
+	tests := []struct {
+		name       string
+		schema     Schema
+		skipTables []string
+		repeat     bool
+		sort       bool
+		expected   []Reference
+	}{
+		{
+			name: "infers exact and regular plural names",
+			schema: Schema{Tables: []Table{
+				table("account", "id"),
+				table("users", "id"),
+				table("events", "account_id", "user_id"),
+			}},
+			expected: []Reference{
+				reference("events", "account_id", "account"),
+				reference("events", "user_id", "users"),
+			},
+		},
+		{
+			name: "infers ies plural from singular and exact plural stems",
+			schema: Schema{Tables: []Table{
+				table("categories", "id"),
+				table("posts", "category_id", "categories_id"),
+			}},
+			expected: []Reference{
+				reference("posts", "category_id", "categories"),
+				reference("posts", "categories_id", "categories"),
+			},
+		},
+		{
+			name: "matches and preserves the same qualifier",
+			schema: Schema{Tables: []Table{
+				table("public.posts", "user_id"),
+				table("public.users", "id"),
+				table("audit.users", "id"),
+			}},
+			expected: []Reference{
+				reference("public.posts", "user_id", "public.users"),
+			},
+		},
+		{
+			name: "does not fall back across qualifiers",
+			schema: Schema{Tables: []Table{
+				table("public.posts", "account_id"),
+				table("audit.accounts", "id"),
+			}},
+		},
+		{
+			name: "does not infer an ambiguous alias",
+			schema: Schema{Tables: []Table{
+				table("public.posts", "category_id"),
+				table("public.category", "id"),
+				table("public.categories", "id"),
+			}},
+		},
+		{
+			name: "requires an exact id column but not a primary key",
+			schema: Schema{Tables: []Table{
+				table("events", "account_id", "user_id"),
+				table("account", "id"),
+				table("users", "ID"),
+			}},
+			expected: []Reference{
+				reference("events", "account_id", "account"),
+			},
+		},
+		{
+			name: "matches source column names case sensitively",
+			schema: Schema{Tables: []Table{
+				table("events", "User_id", "_id", "userID", "parent_id"),
+				table("users", "id"),
+			}},
+		},
+		{
+			name: "keeps explicit references authoritative",
+			schema: Schema{
+				Tables: []Table{
+					table("posts", "category_id", "user_id"),
+					table("categories", "id"),
+					table("users", "id"),
+				},
+				References: []Reference{
+					reference("posts", "category_id", "taxonomy.tags"),
+				},
+			},
+			expected: []Reference{
+				reference("posts", "category_id", "taxonomy.tags"),
+				reference("posts", "user_id", "users"),
+			},
+		},
+		{
+			name: "is idempotent and permits a unique self reference",
+			schema: Schema{Tables: []Table{
+				table("categories", "id", "category_id"),
+			}},
+			repeat: true,
+			expected: []Reference{
+				reference("categories", "category_id", "categories"),
+			},
+		},
+		{
+			name: "does not target a skipped table",
+			schema: Schema{Tables: []Table{
+				table("posts", "category_id"),
+				table("categories", "id"),
+			}},
+			skipTables: []string{"categories"},
+		},
+		{
+			name: "sorts inferred references with existing schema ordering",
+			schema: Schema{Tables: []Table{
+				table("posts", "user_id", "category_id"),
+				table("users", "id"),
+				table("categories", "id"),
+			}},
+			sort: true,
+			expected: []Reference{
+				reference("posts", "category_id", "categories"),
+				reference("posts", "user_id", "users"),
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			actual := tt.schema
+			actual.SkipTables(tt.skipTables...)
+			actual.AddLogicalReferences()
+			if tt.repeat {
+				actual.AddLogicalReferences()
+			}
+			if tt.sort {
+				actual.Sort()
+			}
+
+			assert.Equal(t, tt.expected, actual.References)
+		})
+	}
+}
