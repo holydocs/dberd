@@ -1,9 +1,11 @@
 package dberd
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestSchema_Sort(t *testing.T) {
@@ -512,6 +514,157 @@ func TestSchema_AddLogicalReferences(t *testing.T) {
 				actual.Sort()
 			}
 
+			assert.Equal(t, tt.expected, actual.References)
+		})
+	}
+}
+
+func TestParsePredefinedLogicalReferences(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name     string
+		yaml     string
+		expected []Reference
+		wantErr  bool
+	}{
+		{
+			name: "parses fully qualified non-id references",
+			yaml: `references:
+  - source:
+      table: public.orders
+      column: billing_contact
+    target:
+      table: public.contacts
+      column: external_id
+`,
+			expected: []Reference{{
+				Source: TableColumn{Table: "public.orders", Column: "billing_contact"},
+				Target: TableColumn{Table: "public.contacts", Column: "external_id"},
+			}},
+		},
+		{
+			name:    "rejects malformed yaml",
+			yaml:    "references: [",
+			wantErr: true,
+		},
+		{
+			name: "rejects unknown fields",
+			yaml: `references:
+  - source: {table: orders, column: contact_id, unexpected: value}
+    target: {table: contacts, column: id}
+`,
+			wantErr: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			actual, err := ParsePredefinedLogicalReferences(strings.NewReader(tt.yaml))
+
+			if tt.wantErr {
+				assert.Error(t, err)
+				return
+			}
+
+			require.NoError(t, err)
+			assert.Equal(t, tt.expected, actual)
+		})
+	}
+}
+
+func TestSchema_AddPredefinedLogicalReferences(t *testing.T) {
+	t.Parallel()
+
+	table := func(name string, columns ...string) Table {
+		result := Table{Name: name, Columns: make([]Column, 0, len(columns))}
+		for _, column := range columns {
+			result.Columns = append(result.Columns, Column{Name: column})
+		}
+		return result
+	}
+
+	configuredReference := Reference{
+		Source: TableColumn{Table: "public.orders", Column: "billing_contact"},
+		Target: TableColumn{Table: "public.contacts", Column: "external_id"},
+	}
+
+	tests := []struct {
+		name       string
+		schema     Schema
+		references []Reference
+		expected   []Reference
+		wantErr    string
+	}{
+		{
+			name: "adds a valid reference and ignores an exact duplicate",
+			schema: Schema{Tables: []Table{
+				table("public.orders", "billing_contact"),
+				table("public.contacts", "external_id"),
+			}},
+			references: []Reference{configuredReference, configuredReference},
+			expected:   []Reference{configuredReference},
+		},
+		{
+			name: "does not change schema when any endpoint is missing",
+			schema: Schema{Tables: []Table{
+				table("public.orders", "billing_contact"),
+				table("public.contacts", "external_id"),
+			}},
+			references: []Reference{
+				configuredReference,
+				{Source: TableColumn{Table: "public.orders", Column: "missing"}, Target: configuredReference.Target},
+			},
+			wantErr: "source column public.orders.missing does not exist",
+		},
+		{
+			name: "rejects a different target for an existing source",
+			schema: Schema{
+				Tables: []Table{
+					table("public.orders", "billing_contact"),
+					table("public.contacts", "external_id"),
+					table("public.legacy_contacts", "id"),
+				},
+				References: []Reference{{
+					Source: configuredReference.Source,
+					Target: TableColumn{Table: "public.legacy_contacts", Column: "id"},
+				}},
+			},
+			references: []Reference{configuredReference},
+			expected: []Reference{{
+				Source: configuredReference.Source,
+				Target: TableColumn{Table: "public.legacy_contacts", Column: "id"},
+			}},
+			wantErr: "source column public.orders.billing_contact already references public.legacy_contacts.id",
+		},
+		{
+			name: "ignores an exact duplicate when the schema already contains duplicates",
+			schema: Schema{
+				Tables: []Table{
+					table("public.orders", "billing_contact"),
+					table("public.contacts", "external_id"),
+				},
+				References: []Reference{configuredReference, configuredReference},
+			},
+			references: []Reference{configuredReference},
+			expected:   []Reference{configuredReference, configuredReference},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			actual := tt.schema
+			err := actual.AddPredefinedLogicalReferences(tt.references)
+
+			if tt.wantErr != "" {
+				require.ErrorContains(t, err, tt.wantErr)
+			} else {
+				require.NoError(t, err)
+			}
 			assert.Equal(t, tt.expected, actual.References)
 		})
 	}

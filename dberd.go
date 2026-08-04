@@ -210,14 +210,14 @@ type Column struct {
 
 // TableColumn represents a reference to a specific column in a table.
 type TableColumn struct {
-	Table  string `json:"table"`
-	Column string `json:"column"`
+	Table  string `json:"table" yaml:"table"`
+	Column string `json:"column" yaml:"column"`
 }
 
 // Reference represents a foreign key relationship between two table columns.
 type Reference struct {
-	Source TableColumn `json:"source"`
-	Target TableColumn `json:"target"`
+	Source TableColumn `json:"source" yaml:"source"`
+	Target TableColumn `json:"target" yaml:"target"`
 }
 
 // FormattedSchema represents a formatted database schema.
