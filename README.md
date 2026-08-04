@@ -131,6 +131,13 @@ Use `--skip-tables` to omit a comma-separated list of tables from the output.
 Unqualified names, such as `goose_db_version`, match that table in every schema;
 qualified names, such as `public.goose_db_version`, match only that exact table.
 
+Use `--add-logical-references` to infer logical references from columns named
+`<table>_id`. The column is linked to the `id` column of a uniquely matching
+table in the same schema; singular and regular plural table names are matched.
+Ambiguous matches are skipped, and existing references take precedence over
+inferred ones. Inferred relationships are labelled `logical <source-column>` in
+generated diagrams.
+
 Use `--logical-references-file` to add explicit logical references that are not
 defined as database foreign keys. The file is YAML and declares fully qualified
 source and target table-column pairs:
