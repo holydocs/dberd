@@ -124,6 +124,14 @@ func logicalTableAliases(name string) []string {
 	switch {
 	case strings.HasSuffix(name, "ies"):
 		singular = strings.TrimSuffix(name, "ies") + "y"
+	case strings.HasSuffix(name, "zzes"):
+		singular = strings.TrimSuffix(name, "zes")
+	case strings.HasSuffix(name, "ches"),
+		strings.HasSuffix(name, "shes"),
+		strings.HasSuffix(name, "sses"),
+		strings.HasSuffix(name, "xes"),
+		strings.HasSuffix(name, "zes"):
+		singular = strings.TrimSuffix(name, "es")
 	case strings.HasSuffix(name, "s"):
 		singular = strings.TrimSuffix(name, "s")
 	}

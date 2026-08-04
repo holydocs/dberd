@@ -408,6 +408,24 @@ func TestSchema_AddLogicalReferences(t *testing.T) {
 			},
 		},
 		{
+			name: "infers common es plurals from singular stems",
+			schema: Schema{Tables: []Table{
+				table("addresses", "id"),
+				table("boxes", "id"),
+				table("dishes", "id"),
+				table("quizzes", "id"),
+				table("watches", "id"),
+				table("deliveries", "address_id", "box_id", "dish_id", "quiz_id", "watch_id"),
+			}},
+			expected: []Reference{
+				reference("deliveries", "address_id", "addresses"),
+				reference("deliveries", "box_id", "boxes"),
+				reference("deliveries", "dish_id", "dishes"),
+				reference("deliveries", "quiz_id", "quizzes"),
+				reference("deliveries", "watch_id", "watches"),
+			},
+		},
+		{
 			name: "matches and preserves the same qualifier",
 			schema: Schema{Tables: []Table{
 				table("public.posts", "user_id"),
