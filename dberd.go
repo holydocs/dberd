@@ -95,7 +95,11 @@ func (s *Schema) AddLogicalReferences() {
 				continue
 			}
 
-			s.References = append(s.References, Reference{Source: source, Target: targets[0]})
+			s.References = append(s.References, Reference{
+				Source: source,
+				Target: targets[0],
+				Name:   "logical " + column.Name,
+			})
 			referencedSources[source] = struct{}{}
 		}
 	}
@@ -218,6 +222,7 @@ type TableColumn struct {
 type Reference struct {
 	Source TableColumn `json:"source" yaml:"source"`
 	Target TableColumn `json:"target" yaml:"target"`
+	Name   string      `json:"name,omitempty" yaml:"name,omitempty"`
 }
 
 // FormattedSchema represents a formatted database schema.

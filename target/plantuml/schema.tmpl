@@ -16,6 +16,6 @@ table({{.Name}}) {
 {{- end }}
 
 {{- range .References }}
-{{.Source.Table}} }o--|| {{.Target.Table}} : {{.Source.Column}} references {{.Target.Column}}
+{{.Source.Table}} }o--|| {{.Target.Table}} : {{if .Name}}{{.Name}}{{else}}{{.Source.Column}} references {{.Target.Column}}{{end}}
 {{- end }}
 @enduml 

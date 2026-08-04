@@ -143,14 +143,18 @@ references:
     target:
       table: public.contacts
       column: external_id
+    name: billing contact
 ```
 
 Each endpoint must exist in the extracted schema. Conflicting mappings fail, while
 an exact duplicate is ignored. Predefined references are applied after
 `--skip-tables` and before optional `--add-logical-references` inference, so an
 explicit mapping takes precedence over inferred references for the same source
-column. See [`examples/logical-references.yaml`](examples/logical-references.yaml)
-for a copyable template.
+column. `name` is optional and labels the relationship in generated diagrams;
+unnamed predefined references keep the target format's existing endpoint-based
+label. Inferred references are named `logical <source-column>`. See
+[`examples/logical-references.yaml`](examples/logical-references.yaml) for a
+copyable template.
 
 Or using Docker:
 ```bash

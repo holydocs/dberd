@@ -9,5 +9,5 @@ erDiagram
 {{- end }}
 
 {{- range .References }}
-    "{{ .Source.Table }}" }o--|| "{{ .Target.Table }}" : "{{ .Source.Column }} -> {{ .Target.Column }}"
-{{- end }} 
+    "{{ .Source.Table }}" }o--|| "{{ .Target.Table }}" : "{{if .Name}}{{.Name}}{{else}}{{ .Source.Column }} -> {{ .Target.Column }}{{end}}"
+{{- end }}

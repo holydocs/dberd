@@ -372,6 +372,7 @@ func TestSchema_AddLogicalReferences(t *testing.T) {
 		return Reference{
 			Source: TableColumn{Table: sourceTable, Column: sourceColumn},
 			Target: TableColumn{Table: targetTable, Column: "id"},
+			Name:   "logical " + sourceColumn,
 		}
 	}
 
@@ -537,6 +538,19 @@ func TestParsePredefinedLogicalReferences(t *testing.T) {
     target:
       table: public.contacts
       column: external_id
+    name: billing contact
+`,
+			expected: []Reference{{
+				Source: TableColumn{Table: "public.orders", Column: "billing_contact"},
+				Target: TableColumn{Table: "public.contacts", Column: "external_id"},
+				Name:   "billing contact",
+			}},
+		},
+		{
+			name: "keeps an omitted name empty",
+			yaml: `references:
+  - source: {table: public.orders, column: billing_contact}
+    target: {table: public.contacts, column: external_id}
 `,
 			expected: []Reference{{
 				Source: TableColumn{Table: "public.orders", Column: "billing_contact"},
@@ -650,6 +664,30 @@ func TestSchema_AddPredefinedLogicalReferences(t *testing.T) {
 			},
 			references: []Reference{configuredReference},
 			expected:   []Reference{configuredReference, configuredReference},
+		},
+		{
+			name: "ignores an exact duplicate with a different name",
+			schema: Schema{
+				Tables: []Table{
+					table("public.orders", "billing_contact"),
+					table("public.contacts", "external_id"),
+				},
+				References: []Reference{{
+					Source: configuredReference.Source,
+					Target: configuredReference.Target,
+					Name:   "existing name",
+				}},
+			},
+			references: []Reference{{
+				Source: configuredReference.Source,
+				Target: configuredReference.Target,
+				Name:   "configured name",
+			}},
+			expected: []Reference{{
+				Source: configuredReference.Source,
+				Target: configuredReference.Target,
+				Name:   "existing name",
+			}},
 		},
 	}
 

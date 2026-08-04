@@ -5,3 +5,4 @@ references:
     target:
       table: public.contacts
       column: external_id
+    name: billing contact

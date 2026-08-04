@@ -238,7 +238,8 @@
       "target": {
         "table": "public.users",
         "column": "id"
-      }
+      },
+      "name": "post author"
     },
     {
       "source": {
