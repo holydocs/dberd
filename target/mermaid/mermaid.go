@@ -6,6 +6,7 @@ import (
 	"context"
 	"embed"
 	"fmt"
+	"strings"
 	"text/template"
 
 	"github.com/holydocs/dberd"
@@ -27,7 +28,9 @@ type Target struct {
 
 // NewTarget creates a new Mermaid JS diagram formatter instance.
 func NewTarget() (*Target, error) {
-	tmpl, err := template.ParseFS(templateFS, "schema.tmpl")
+	tmpl, err := template.New("schema.tmpl").Funcs(template.FuncMap{
+		"mermaidComment": mermaidComment,
+	}).ParseFS(templateFS, "schema.tmpl")
 	if err != nil {
 		return nil, fmt.Errorf("parsing template: %w", err)
 	}
@@ -35,6 +38,20 @@ func NewTarget() (*Target, error) {
 	return &Target{
 		template: tmpl,
 	}, nil
+}
+
+func mermaidComment(definition, comment string) string {
+	parts := make([]string, 0, 2)
+
+	for _, value := range []string{definition, comment} {
+		value = strings.Join(strings.Fields(value), " ")
+		value = strings.ReplaceAll(value, `"`, "'")
+		if value != "" {
+			parts = append(parts, value)
+		}
+	}
+
+	return strings.Join(parts, "; ")
 }
 
 // Capabilities returns target capabilities.

@@ -1,27 +1,27 @@
 erDiagram
     "public.users" {
-        INT8 NOT NULL id PK
-        VARCHAR(255) NOT NULL name
-        VARCHAR(255) NOT NULL email
-        TIMESTAMP DEFAULT current_timestamp() created_at
+        column id PK "INT8 NOT NULL"
+        column name "VARCHAR(255) NOT NULL"
+        column email "VARCHAR(255) NOT NULL; User email address"
+        column created_at "TIMESTAMP DEFAULT current_timestamp()"
     }
     "public.roles" {
-        INT8 NOT NULL id PK
-        VARCHAR(50) NOT NULL name
-        STRING description
-        TIMESTAMP DEFAULT current_timestamp() created_at
+        column id PK "INT8 NOT NULL"
+        column name "VARCHAR(50) NOT NULL"
+        column description "STRING; Role description and permissions"
+        column created_at "TIMESTAMP DEFAULT current_timestamp()"
     }
     "public.user_roles" {
-        INT8 NOT NULL user_id PK
-        INT8 NOT NULL role_id PK
-        TIMESTAMP DEFAULT current_timestamp() assigned_at
+        column user_id PK "INT8 NOT NULL"
+        column role_id PK "INT8 NOT NULL"
+        column assigned_at "TIMESTAMP DEFAULT current_timestamp()"
     }
     "public.posts" {
-        INT8 NOT NULL id PK
-        INT8 NOT NULL user_id
-        VARCHAR(255) NOT NULL title
-        STRING content
-        TIMESTAMP DEFAULT current_timestamp() created_at
+        column id PK "INT8 NOT NULL"
+        column user_id "INT8 NOT NULL"
+        column title "VARCHAR(255) NOT NULL"
+        column content "STRING"
+        column created_at "TIMESTAMP DEFAULT current_timestamp()"
     }
     "public.user_roles" }o--|| "public.roles" : "role_id -> id"
     "public.user_roles" }o--|| "public.users" : "user_id -> id"

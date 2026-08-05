@@ -10,10 +10,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-var (
-	//go:embed testdata/schema.mmd
-	testSchema []byte
-)
+//go:embed testdata/schema.mmd
+var testSchema []byte
 
 func TestFormatSchema(t *testing.T) {
 	t.Parallel()
