@@ -12,5 +12,5 @@ direction: right
 
 # References
 {{- range .References }}
-{{.Source.Table}}.{{.Source.Column}} -> {{.Target.Table}}.{{.Target.Column}}
+{{.Source.Table}}.{{.Source.Column}} -> {{.Target.Table}}.{{.Target.Column}}{{if .Name}}: {{.Name}}{{end}}
 {{- end }}

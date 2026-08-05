@@ -1,0 +1,8 @@
+references:
+  - source:
+      table: public.orders
+      column: billing_contact
+    target:
+      table: public.contacts
+      column: external_id
+    name: billing contact

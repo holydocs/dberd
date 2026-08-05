@@ -14,6 +14,7 @@ require (
 	github.com/testcontainers/testcontainers-go/modules/mysql v0.37.0
 	github.com/testcontainers/testcontainers-go/modules/postgres v0.37.0
 	go.mongodb.org/mongo-driver v1.17.4
+	gopkg.in/yaml.v3 v3.0.1
 	oss.terrastruct.com/d2 v0.7.0
 	oss.terrastruct.com/util-go v0.0.0-20250213174338-243d8661088a
 )
@@ -109,5 +110,4 @@ require (
 	gonum.org/v1/plot v0.14.0 // indirect
 	google.golang.org/grpc v1.70.0 // indirect
 	google.golang.org/protobuf v1.36.5 // indirect
-	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

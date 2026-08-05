@@ -122,12 +122,46 @@ dberd --source cockroach \
       --format-to-file schema.d2 \
       --render-to-file schema.svg \
       --skip-tables goose_db_version,schema_migrations \
+      --add-logical-references \
+      --logical-references-file examples/logical-references.yaml \
       --source-dsn "postgres://user@host:port/db?sslmode=disable"
 ```
 
 Use `--skip-tables` to omit a comma-separated list of tables from the output.
 Unqualified names, such as `goose_db_version`, match that table in every schema;
 qualified names, such as `public.goose_db_version`, match only that exact table.
+
+Use `--add-logical-references` to infer logical references from columns named
+`<table>_id`. The column is linked to the `id` column of a uniquely matching
+table in the same schema; singular and regular plural table names are matched.
+Ambiguous matches are skipped, and existing references take precedence over
+inferred ones. Inferred relationships are labelled `logical <source-column>` in
+generated diagrams.
+
+Use `--logical-references-file` to add explicit logical references that are not
+defined as database foreign keys. The file is YAML and declares fully qualified
+source and target table-column pairs:
+
+```yaml
+references:
+  - source:
+      table: public.orders
+      column: billing_contact
+    target:
+      table: public.contacts
+      column: external_id
+    name: billing contact
+```
+
+Each endpoint must exist in the extracted schema. Conflicting mappings fail, while
+an exact duplicate is ignored. Predefined references are applied after
+`--skip-tables` and before optional `--add-logical-references` inference, so an
+explicit mapping takes precedence over inferred references for the same source
+column. `name` is optional and labels the relationship in generated diagrams;
+unnamed predefined references keep the target format's existing endpoint-based
+label. Inferred references are named `logical <source-column>`. See
+[`examples/logical-references.yaml`](examples/logical-references.yaml) for a
+copyable template.
 
 Or using Docker:
 ```bash

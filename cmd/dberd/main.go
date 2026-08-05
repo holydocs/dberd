@@ -27,6 +27,8 @@ func main() {
 	renderToFile := flag.String("render-to-file", "", "Output file for the rendered diagram")
 	sourceDSN := flag.String("source-dsn", "", "Connection string for source database")
 	skipTables := flag.String("skip-tables", "", "Comma-separated table names to omit from the output schema")
+	addLogicalReferences := flag.Bool("add-logical-references", false, "Infer references from <table>_id column names")
+	logicalReferencesFile := flag.String("logical-references-file", "", "YAML file containing predefined logical references")
 
 	help := flag.Bool("help", false, "Show help")
 
@@ -75,6 +77,21 @@ func main() {
 	}
 
 	schema.SkipTables(strings.Split(*skipTables, ",")...)
+	if *logicalReferencesFile != "" {
+		predefinedReferences, err := loadPredefinedLogicalReferences(*logicalReferencesFile)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error: Loading predefined logical references %v\n", err)
+			os.Exit(1)
+		}
+
+		if err := schema.AddPredefinedLogicalReferences(predefinedReferences); err != nil {
+			fmt.Fprintf(os.Stderr, "Error: Adding predefined logical references %v\n", err)
+			os.Exit(1)
+		}
+	}
+	if *addLogicalReferences {
+		schema.AddLogicalReferences()
+	}
 	schema.Sort()
 
 	fs, err := target.FormatSchema(ctx, schema)
@@ -104,6 +121,21 @@ func main() {
 			os.Exit(1)
 		}
 	}
+}
+
+func loadPredefinedLogicalReferences(path string) ([]dberd.Reference, error) {
+	file, err := os.Open(path)
+	if err != nil {
+		return nil, fmt.Errorf("opening %s: %w", path, err)
+	}
+	defer file.Close()
+
+	references, err := dberd.ParsePredefinedLogicalReferences(file)
+	if err != nil {
+		return nil, fmt.Errorf("parsing %s: %w", path, err)
+	}
+
+	return references, nil
 }
 
 func pickSource(sourceType, sourceDSN string) (dberd.Source, error) {

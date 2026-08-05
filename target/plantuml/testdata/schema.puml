@@ -49,7 +49,7 @@ public.comments }o--|| public.posts : post_id references id
 public.comments }o--|| public.users : user_id references id
 public.post_categories }o--|| public.categories : category_id references id
 public.post_categories }o--|| public.posts : post_id references id
-public.posts }o--|| public.users : user_id references id
+public.posts }o--|| public.users : post author
 public.user_roles }o--|| public.roles : role_id references id
 public.user_roles }o--|| public.users : user_id references id
 @enduml 
