@@ -3,7 +3,7 @@ erDiagram
 {{- range .Tables }}
     "{{ .Name }}" {
         {{- range .Columns }}
-        {{ .Definition }} {{ .Name }}{{ if .IsPrimary }} PK{{ end }}
+        column {{ .Name }}{{ if .IsPrimary }} PK{{ end }}{{ with mermaidComment .Definition .Comment }} "{{ . }}"{{ end }}
         {{- end }}
     }
 {{- end }}
