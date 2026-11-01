@@ -2,15 +2,15 @@ direction: right
 
 # Tables
 {{- range .Tables }}
-{{.Name}}: {
+{{tableKey .Name}}: {
   shape: "sql_table"
 {{- range .Columns }}
-  {{.Name}}: "{{.Definition}}"{{if .IsPrimary}} { constraint: [primary_key] }{{end}}
+  {{quote .Name}}: {{quote .Definition}}{{if .IsPrimary}} { constraint: [primary_key] }{{end}}
 {{- end }}
 }
 {{- end }}
 
 # References
 {{- range .References }}
-{{.Source.Table}}.{{.Source.Column}} -> {{.Target.Table}}.{{.Target.Column}}{{if .Name}}: {{.Name}}{{end}}
+{{tableKey .Source.Table}}.{{quote .Source.Column}} -> {{tableKey .Target.Table}}.{{quote .Target.Column}}{{if .Name}}: {{quote .Name}}{{end}}
 {{- end }}
