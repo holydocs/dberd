@@ -130,3 +130,52 @@ func TestRenderSchema(t *testing.T) {
 
 	assert.Equal(t, testSVG, actual)
 }
+
+func TestFormatAndRenderSpecialChars(t *testing.T) {
+	t.Parallel()
+
+	const innerTable = "default..inner_id.da5d7942-ada3-4e28-8a03-e72fa0996c76"
+
+	schema := dberd.Schema{
+		Tables: []dberd.Table{
+			{
+				Name: innerTable,
+				Columns: []dberd.Column{
+					{Name: "id", Definition: "UUID", IsPrimary: true},
+					{Name: "nested.field", Definition: `String DEFAULT 'a "quoted" \ value'`},
+				},
+			},
+			{
+				Name: "default.events",
+				Columns: []dberd.Column{
+					{Name: "id", Definition: "UUID", IsPrimary: true},
+					{Name: "inner_id", Definition: "UUID"},
+				},
+			},
+		},
+		References: []dberd.Reference{
+			{
+				Source: dberd.TableColumn{Table: "default.events", Column: "inner_id"},
+				Target: dberd.TableColumn{Table: innerTable, Column: "id"},
+				Name:   `points to "inner"`,
+			},
+		},
+	}
+
+	ctx := context.Background()
+
+	target, err := NewTarget()
+	require.NoError(t, err)
+
+	formatted, err := target.FormatSchema(ctx, schema)
+	require.NoError(t, err)
+
+	data := string(formatted.Data)
+	assert.Contains(t, data, `"default".".inner_id.da5d7942-ada3-4e28-8a03-e72fa0996c76": {`)
+	assert.Contains(t, data, `"nested.field": "String DEFAULT 'a \"quoted\" \\ value'"`)
+	assert.Contains(t, data,
+		`"default"."events"."inner_id" -> "default".".inner_id.da5d7942-ada3-4e28-8a03-e72fa0996c76"."id": "points to \"inner\""`)
+
+	_, err = target.RenderSchema(ctx, formatted)
+	require.NoError(t, err)
+}

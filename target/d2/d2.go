@@ -8,6 +8,7 @@ import (
 	"context"
 	"embed"
 	"fmt"
+	"strings"
 	"text/template"
 
 	"github.com/holydocs/dberd"
@@ -26,6 +27,33 @@ const targetType = dberd.TargetType("d2")
 
 //go:embed schema.tmpl
 var templateFS embed.FS
+
+// templateFuncs are helpers available in schema.tmpl.
+var templateFuncs = template.FuncMap{
+	"quote":    quote,
+	"tableKey": tableKey,
+}
+
+// d2Escaper escapes characters that are special inside D2 double-quoted strings.
+var d2Escaper = strings.NewReplacer(`\`, `\\`, `"`, `\"`)
+
+// quote returns s as a D2 double-quoted string, so that dots and other
+// special characters are treated literally.
+func quote(s string) string {
+	return `"` + d2Escaper.Replace(s) + `"`
+}
+
+// tableKey returns the D2 key for a table name in the "<schema>.<table>" form.
+// The schema becomes a container and the table is nested inside it.
+// Only the first dot is treated as a separator, so table names may contain dots.
+func tableKey(name string) string {
+	schema, table, found := strings.Cut(name, ".")
+	if !found {
+		return quote(name)
+	}
+
+	return quote(schema) + "." + quote(table)
+}
 
 // Ensure Target implements dberd interfaces.
 var (
@@ -67,7 +95,7 @@ func WithCompileOpts(compileOpts *d2lib.CompileOptions) TargetOpt {
 // rendering and compilation options. The formatter uses the ELK layout engine for
 // diagram arrangement.
 func NewTarget() (*Target, error) {
-	tmpl, err := template.ParseFS(templateFS, "schema.tmpl")
+	tmpl, err := template.New("schema.tmpl").Funcs(templateFuncs).ParseFS(templateFS, "schema.tmpl")
 	if err != nil {
 		return nil, fmt.Errorf("parsing template: %w", err)
 	}
